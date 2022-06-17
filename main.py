@@ -1,4 +1,4 @@
-import discord , io , os , random , re , time , asyncio
+import discord, io, os, random, sys, time, asyncio
 from dotenv import load_dotenv
 
 # load environment variables
@@ -6,43 +6,11 @@ load_dotenv()
 
 # instantiate client
 client = discord.Client()
-clientUser = discord.ClientUser
-
-async def webhook_get(channel: discord.TextChannel):
-	try:
-		for webhook in await channel.webhooks():
-			if webhook.token: return webhook
-
-		print('making webhook for '+channel.name)
-		return await channel.create_webhook(
-			name="mishnet webhook",
-			reason="yeah"
-		)
-	except discord.HTTPException as e:
-		messages = [
-			"there has been a http error.",
-			"oopsie doopsie! da http went fucky wucky! 3:",
-			"oopsie woopsie our code kitty is hard at work.",
-		]
-		await channel.send(random.choice(messages))
-		return None
-	except discord.Forbidden as e:
-		await channel.send("missing 'manage webhook' perms >:(")
-		return None
-
-async def bridge(channel , message , name , pfp):
-	webhook = await webhook_get(channel)
-	if not webhook:
-		await message.channel.send('webhook error')
-	await webhook.send(allowed_mentions=discord.AllowedMentions.none(), content=message, username=name, avatar_url=pfp)
-
-def cut(string , length):
-	return string[0:length-4] + '...'
 
 @client.event
 async def on_ready():
 	print(f'{client.user} has connected to Discord!')
-	global connected , hallowspeak
+	global connected, hallowspeak
 	mishserver = client.get_channel(915251024174940160)
 	agonyserver = client.get_channel(746466196978794517)
 	cpserver = client.get_channel(987001423977914428)
@@ -60,13 +28,17 @@ async def on_ready():
 	}
 
 @client.event
-async def on_message(message):
-
+async def on_message(message: discord.Message):
 	if message.author.bot:
 		return
 
 	if message.channel in connected:
-		if message.content == "perftest": startTime = time.perf_counter()
+		if message.content == "perftest": 
+			startTime = time.perf_counter()
+		
+		if message.content == "pissbaby":
+			raise Exception("el pepe")
+
 		sendList = [i for i in connected if i.guild != message.channel.guild]
 
 		toSend = message.content + ' ' + ' '.join([i.url for i in message.attachments])
@@ -83,7 +55,37 @@ async def on_message(message):
 			for channel in connected:
 				loop.create_task(bridge(channel, toSend, name, pfp))
 
-	return
+async def bridge(channel: discord.TextChannel, to_send: str, name: str, pfp: discord.Asset):
+	webhook = await get_webhook_for_channel(channel)
+	await webhook.send(allowed_mentions=discord.AllowedMentions.none(), content=to_send, username=name, avatar_url=pfp)
 
-#start bot
+async def get_webhook_for_channel(channel: discord.TextChannel):
+	# webhooks that we own have a non-None token attribute
+	for webhook in await channel.webhooks():
+		if webhook.token:
+			return webhook
+
+	print(f"Making webhook for {channel.name}...")
+	return await channel.create_webhook(name="mishnet webhook", reason="yeah")
+
+@client.event
+async def on_error(event, *args, **kwargs):
+	# FIXME: this is _the_ most horrible way to find the channel. please for the love of god fix this
+	for arg in args:
+		if hasattr(arg, "channel") and isinstance(arg.channel, discord.TextChannel):
+			channel = arg.channel
+			break
+	else:
+		# no channel to send error message to, cope
+		return
+
+	exception_type, exception_instance, traceback = sys.exc_info()
+	messages = [
+		"there has been a http error happening here in the code. yes",
+		"oopsie doopsie! da http went fucky wucky!",
+		"oopsie woopsie our code kitty is hard at work",
+	]
+	await channel.send(f"{random.choice(messages)}: {str(exception_instance)}")
+
+# start bot
 client.run(os.getenv('TOKEN'))
