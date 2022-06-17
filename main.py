@@ -1,11 +1,13 @@
 import discord, io, os, random, sys, time, asyncio
 from dotenv import load_dotenv
+from message_associations import MessageAssociations
 
 # load environment variables
 load_dotenv()
 
 # instantiate client
 client = discord.Client()
+associations = MessageAssociations()
 
 @client.event
 async def on_ready():
@@ -36,28 +38,32 @@ async def on_message(message: discord.Message):
 		if message.content == "perftest": 
 			startTime = time.perf_counter()
 		
-		if message.content == "pissbaby":
-			raise Exception("el pepe")
-
-		sendList = [i for i in connected if i.guild != message.channel.guild]
-
-		toSend = message.content + ' ' + ' '.join([i.url for i in message.attachments])
+		target_channels = [i for i in connected if i.guild != message.channel.guild]
+		to_send = message.content + ' ' + ' '.join([i.url for i in message.attachments])
 		name = message.author.name + ', from ' + serverNames[message.channel]
 		pfp = message.author.avatar_url
 
-		loop = asyncio.get_running_loop()
-		for channel in sendList:
-			loop.create_task(bridge(channel , toSend , name , pfp))
+  		# run every message sending thingy in parallel
+		await asyncio.gather(*[bridge(message , channel , to_send , name , pfp) for channel in target_channels])
 
 		if message.content == "perftest":
 			endTime = time.perf_counter()
-			toSend = "bridge time: " + str(endTime - startTime)
+			to_send = "bridge time: " + str(endTime - startTime)
+			loop = asyncio.get_event_loop()
 			for channel in connected:
-				loop.create_task(bridge(channel, toSend, name, pfp))
+				loop.create_task(bridge(message, channel, to_send, name, pfp))
 
-async def bridge(channel: discord.TextChannel, to_send: str, name: str, pfp: discord.Asset):
-	webhook = await get_webhook_for_channel(channel)
-	await webhook.send(allowed_mentions=discord.AllowedMentions.none(), content=to_send, username=name, avatar_url=pfp)
+async def bridge(original_message: discord.Message, target_channel: discord.TextChannel, to_send: str, name: str, pfp: discord.Asset):
+	webhook = await get_webhook_for_channel(target_channel)
+	copy_message = await webhook.send(
+		allowed_mentions=discord.AllowedMentions.none(), 
+		content=to_send, 
+		username=name, 
+		avatar_url=pfp, 
+		wait=True,
+	)
+	assert copy_message is not None
+	associations.add_copy(original_message, copy_message)
 
 async def get_webhook_for_channel(channel: discord.TextChannel):
 	# webhooks that we own have a non-None token attribute
@@ -67,6 +73,12 @@ async def get_webhook_for_channel(channel: discord.TextChannel):
 
 	print(f"Making webhook for {channel.name}...")
 	return await channel.create_webhook(name="mishnet webhook", reason="yeah")
+
+@client.event
+async def on_message_delete(message: discord.Message):
+	for associated_message in associations.retrieve_others(message):
+		print(f"{associated_message=}")
+		await associated_message.delete()
 
 @client.event
 async def on_error(event, *args, **kwargs):
@@ -84,6 +96,8 @@ async def on_error(event, *args, **kwargs):
 		"there has been a http error happening here in the code. yes",
 		"oopsie doopsie! da http went fucky wucky!",
 		"oopsie woopsie our code kitty is hard at work",
+		"https://tenor.com/brsRI.gif",
+		"amoung us",
 	]
 	await channel.send(f"{random.choice(messages)}: {str(exception_instance)}")
 
