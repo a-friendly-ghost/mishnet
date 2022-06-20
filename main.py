@@ -60,7 +60,7 @@ async def on_message(message: discord.Message):
 		for channel in mishnet_channel:
 			loop.create_task(bridge(message, channel, name, pfp, content_override=to_send)) # is this a bad way to do this
 
-async def createToSend(message: discord.Message, target_channel: discord.TextChannel) -> str:
+async def create_to_send(message: discord.Message, target_channel: discord.TextChannel) -> str:
 	# i know this is not the most compact way to write this function, but it's the cleanest and nicest imo. optimise it if you want
 	to_send = ''
 	
@@ -73,13 +73,12 @@ async def createToSend(message: discord.Message, target_channel: discord.TextCha
 		else:
 			link_text = 'link'
 
-		partial_message = message.channel.get_partial_message(message.id)
+		replied_partial_message = message.channel.get_partial_message(replied_message.id)
 		link_url = 'link not found'
-		for copy in associations.retrieve_others(partial_message):
-			print(associations.retrieve_others(partial_message))
-			print(copy.channel.name, target_channel.name)
+		for copy in associations.retrieve_others(replied_partial_message):
 			if copy.channel.id == target_channel.id:
 				link_url = copy.jump_url
+				break
 
 		to_send += f"> **{re.sub(', from .*', '', replied_message.author.name)}** [{link_text}]({link_url})" + '\n> ' + replied_message.content.replace('\n','\n> ') + '\n' # fstring cannot contain a backslash???
 	
@@ -92,7 +91,7 @@ async def bridge(original_message: discord.Message, target_channel: discord.Text
 	if content_override:
 		to_send = content_override
 	else:
-		to_send = await createToSend(original_message, target_channel)
+		to_send = await create_to_send(original_message, target_channel)
 	copy_message = await webhook.send(
 		allowed_mentions=discord.AllowedMentions.none(), 
 		content=to_send, 
