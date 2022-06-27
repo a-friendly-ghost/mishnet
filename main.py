@@ -21,8 +21,9 @@ async def on_ready():
 	cpserver = client.get_channel(987001423977914428)
 	ccjserver = client.get_channel(629816294870351884)
 	hallowspeak = client.get_channel(986616150492323840)
+	prolangs = client.get_channel(988876878582546472)
 	global mishnet1 , mishnet_channels
-	mishnet1 = [mishserver , agonyserver , cpserver , ccjserver , hallowspeak]
+	mishnet1 = [mishserver , agonyserver , cpserver , ccjserver , hallowspeak , prolangs]
 	mishnet_channels = [mishnet1]
 
 	global serverNames
@@ -31,7 +32,8 @@ async def on_ready():
 		agonyserver : 'agonyserver',
 		cpserver : 'conphon',
 		ccjserver : 'ccj',
-		hallowspeak : 'Hallowspeak'
+		hallowspeak : 'Hallowspeak',
+		prolangs : 'prolangs'
 	}
 
 @client.event
@@ -50,7 +52,7 @@ async def on_message(message: discord.Message):
 	name = message.author.name + ', from ' + serverNames[message.channel]
 	pfp = message.author.avatar_url
 
- 		# run every message sending thingy in parallel
+ 	# run every message sending thingy in parallel
 	await asyncio.gather(*[bridge(message , channel , name , pfp) for channel in target_channels])
 
 	if message.content == "perftest":
@@ -74,15 +76,16 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 			link_text = 'link'
 
 		replied_partial_message = message.channel.get_partial_message(replied_message.id)
-		link_url = 'link not found'
-		for copy in associations.retrieve_others(replied_partial_message):
-			if copy.channel.id == target_channel.id:
-				link_url = copy.jump_url
-				break
+		link_url = replied_partial_message.jump_url
 
 		to_send += f"> **{re.sub(', from .*', '', replied_message.author.name)}** [{link_text}]({link_url})" + '\n> ' + replied_message.content.replace('\n','\n> ') + '\n' # fstring cannot contain a backslash???
-	
+
 	to_send += message.content
+	
+	# cry about it
+	to_send = re.sub(r"https://discord(?:app)?.com/channels/(\d+)/(\d+)/(\d+)" , lambda x : next(copy for copy in associations.retrieve_others( discord.PartialMessage(channel=client.get_channel(int(x.group(2))) , id=int(x.group(3))) ) if copy.channel.id == target_channel.id).jump_url, to_send)
+	# future mish here: i am crying about it actually thanks
+
 	to_send += ' ' + ' '.join([attachment.url for attachment in message.attachments])
 	return to_send
 
@@ -172,10 +175,13 @@ async def on_message_edit(before , after):
 
 	original_partial_message = before.channel.get_partial_message(before.id) # converts before (discord.Message) into a discord.PartialMessage
 
+	async def edit_copy(partial_message: discord.PartialMessage , after_message: discord.Message):
+		webhook = await get_webhook_for_channel(partial_message.channel)
+		toEdit = await create_to_send(after_message , partial_message.channel)
+		await webhook.edit_message(partial_message.id, content=toEdit)
+
 	try:
-		for associated_partial_message in associations.retrieve_others(original_partial_message): # i don't know how to gather this
-			webhook = await get_webhook_for_channel(associated_partial_message.channel)
-			await webhook.edit_message(associated_partial_message.id, content=after.content)	
+		await asyncio.gather(*[edit_copy(associated_partial_message , after) for associated_partial_message in associations.retrieve_others(original_partial_message)])
 	except discord.errors.Forbidden as e: # idk why the error is happening so, cope # future mish here, i think i fixed this so this error will never happen, but idk can't be too safe
 		print(e)
 		pass
