@@ -36,9 +36,21 @@ async def on_ready():
 		prolangs : 'prolangs'
 	}
 
+	global banlist
+	kaz = 806608196406870027
+	kafka = 708095054748844082
+	banlist = [kaz, kafka]
+
 @client.event
 async def on_message(message: discord.Message):
 	if message.author.bot or message.channel not in mishnet1:
+		return
+
+	if message.author.id in banlist:
+		try:
+			await message.delete()
+		except:
+			pass
 		return
 
 	if message.content == "perftest": 
@@ -83,7 +95,7 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 	to_send += message.content
 	
 	# cry about it
-	to_send = re.sub(r"https://discord(?:app)?.com/channels/(\d+)/(\d+)/(\d+)" , lambda x : next(copy for copy in associations.retrieve_others( discord.PartialMessage(channel=client.get_channel(int(x.group(2))) , id=int(x.group(3))) ) if copy.channel.id == target_channel.id).jump_url, to_send)
+	to_send = re.sub(r"https://discord(?:app)?.com/channels/(\d+)/(\d+)/(\d+)", lambda x : next((copy.jump_url for copy in associations.retrieve_others( discord.PartialMessage(channel=client.get_channel(int(x.group(2))) , id=int(x.group(3))) ) if copy.channel.id == target_channel.id),"link not found"), to_send)
 	# future mish here: i am crying about it actually thanks
 
 	to_send += ' ' + ' '.join([attachment.url for attachment in message.attachments])
@@ -135,7 +147,7 @@ async def on_message_delete(message: discord.Message):
 async def on_bulk_message_delete(messages: list[discord.Message]):
 	for message in messages:
 		for associated_message_id in associations.retrieve_others(message.id):
-			associated_message = await message.channel.fetch_message(associated_message_id)
+			associated_message = await associated_message.channel.fetch_message(associated_message_id)
 			await associated_message.delete()
 
 @client.event
@@ -202,6 +214,7 @@ async def on_error(event, *args, **kwargs):
 		"oopsie doopsie! da http went fucky wucky! {}",
 		"oopsie woopsie our code kitty is hard at work: {}",
 		"when the exception is sus: {}",
+		"the compiler explaining why {}:\nhttps://tenor.com/bGzoN.gif",
 		"exception messag {} e (sussy)" # added spaces around the exception, now it looks intentional
 	]
 	await channel.send(random.choice(messages).format(str(exception)))
