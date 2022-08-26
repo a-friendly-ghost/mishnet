@@ -22,9 +22,17 @@ async def on_ready():
 	ccjserver = client.get_channel(629816294870351884)
 	hallowspeak = client.get_channel(986616150492323840)
 	prolangs = client.get_channel(988876878582546472)
-	global mishnet1 , mishnet_channels
+
+	global mishnet1 , mishnet2 , mishnet_channels
 	mishnet1 = [mishserver , agonyserver , cpserver , ccjserver , hallowspeak , prolangs]
-	mishnet_channels = [mishnet1]
+
+	mishserver2 = client.get_channel(1006522289048784967)
+	agonyserver2 = client.get_channel(1006237275664949349)
+	cpserver2 = client.get_channel(1006522209872920618)
+	hallowspeak2 = client.get_channel(1006526679071596574)
+	prolangs2 = client.get_channel(1006660045511086080)
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , hallowspeak2 , prolangs2]
+	mishnet_channels = [mishnet1 , mishnet2]
 
 	global serverNames
 	serverNames = {
