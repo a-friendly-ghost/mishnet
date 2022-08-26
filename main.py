@@ -1,3 +1,4 @@
+from multiprocessing.connection import Client
 import discord, io, os, random, sys, time, asyncio, re
 from dotenv import load_dotenv
 from message_associations import MessageAssociations
@@ -23,14 +24,14 @@ async def on_ready():
 	hallowspeak = client.get_channel(986616150492323840)
 	prolangs = client.get_channel(988876878582546472)
 
-	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver , agonyserver , cpserver , ccjserver , hallowspeak , prolangs]
-
 	mishserver2 = client.get_channel(1006522289048784967)
 	agonyserver2 = client.get_channel(1006237275664949349)
 	cpserver2 = client.get_channel(1006522209872920618)
 	hallowspeak2 = client.get_channel(1006526679071596574)
 	prolangs2 = client.get_channel(1006660045511086080)
+
+	global mishnet1 , mishnet2 , mishnet_channels
+	mishnet1 = [mishserver , agonyserver , cpserver , ccjserver , hallowspeak , prolangs]
 	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , hallowspeak2 , prolangs2]
 	mishnet_channels = [mishnet1 , mishnet2]
 
@@ -41,7 +42,13 @@ async def on_ready():
 		cpserver : 'conphon',
 		ccjserver : 'ccj',
 		hallowspeak : 'Hallowspeak',
-		prolangs : 'prolangs'
+		
+		prolangs : 'prolangs',
+		mishserver2 : 'mishserver',
+		agonyserver2 : 'agonyserver',
+		cpserver2 : 'conphon',
+		hallowspeak2 : 'Hallowspeak',
+		prolangs2 : 'prolangs'
 	}
 
 	global banlist
@@ -66,6 +73,7 @@ async def on_message(message: discord.Message):
 
 	for group in mishnet_channels: # feeling like this would be another application for the associations data structure, but we made it only work for storing messages
 		if message.channel in group:
+			print('yes')
 			mishnet_channel = group
 	
 	target_channels = [i for i in mishnet_channel if i.guild != message.channel.guild]
@@ -80,7 +88,7 @@ async def on_message(message: discord.Message):
 		to_send = "bridge time: " + str(endTime - startTime)
 		loop = asyncio.get_event_loop()
 		for channel in mishnet_channel:
-			loop.create_task(bridge(message, channel, name, pfp, content_override=to_send)) # is this a bad way to do this
+			loop.create_task(bridge(message, channel, name, client.user.avatar_url, content_override=to_send)) # is this a bad way to do this
 
 async def create_to_send(message: discord.Message, target_channel: discord.TextChannel) -> str:
 	# i know this is not the most compact way to write this function, but it's the cleanest and nicest imo. optimise it if you want
