@@ -58,7 +58,13 @@ async def on_ready():
 
 @client.event
 async def on_message(message: discord.Message):
-	if message.author.bot or message.channel not in mishnet1:
+
+	mishnet_channel = None
+	for group in mishnet_channels: # feeling like this would be another application for the associations data structure, but we made it only work for storing messages
+		if message.channel in group:
+			mishnet_channel = group
+
+	if message.author.bot or not mishnet_channel:
 		return
 
 	if message.author.id in banlist:
@@ -70,11 +76,6 @@ async def on_message(message: discord.Message):
 
 	if message.content == "perftest": 
 		startTime = time.perf_counter()
-
-	for group in mishnet_channels: # feeling like this would be another application for the associations data structure, but we made it only work for storing messages
-		if message.channel in group:
-			print('yes')
-			mishnet_channel = group
 	
 	target_channels = [i for i in mishnet_channel if i.guild != message.channel.guild]
 	name = message.author.name + ', from ' + serverNames[message.channel]
