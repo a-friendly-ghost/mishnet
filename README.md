@@ -15,6 +15,7 @@ finished and working!:
 - editing*
 - deleting*
 - deleting webhook messages with a :x: react*
+- allowing multiple mishnet channels
 *to messages sent after the last bot restart
 
 not coded yet:
