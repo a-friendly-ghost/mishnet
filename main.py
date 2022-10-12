@@ -31,8 +31,8 @@ async def on_ready():
 	prolangs2 = client.get_channel(1006660045511086080)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver , agonyserver , cpserver , ccjserver , hallowspeak , prolangs]
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , hallowspeak2 , prolangs2]
+	mishnet1 = [mishserver , agonyserver , cpserver , ccjserver , hallowspeak , prolangs] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , hallowspeak2 , prolangs2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	global serverNames
@@ -114,6 +114,7 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 	# cry about it
 	to_send = re.sub(r"https://discord(?:app)?.com/channels/(\d+)/(\d+)/(\d+)", lambda x : next((copy.jump_url for copy in associations.retrieve_others( discord.PartialMessage(channel=client.get_channel(int(x.group(2))) , id=int(x.group(3))) ) if copy.channel.id == target_channel.id),"link not found"), to_send)
 	# future mish here: i am crying about it actually thanks
+	# future future mish here (multiple months later): what the actual fuck what was wrong with you (me)
 
 	to_send += ' ' + ' '.join([attachment.url for attachment in message.attachments])
 	return to_send
@@ -145,7 +146,7 @@ async def get_webhook_for_channel(channel: discord.TextChannel):
 
 @client.event
 async def on_message_delete(message: discord.Message):
-	if message.channel not in mishnet1:
+	if message.channel not in [channel for group in mishnet_channels for channel in group]: # i actually fucking hate that this is how you do this
 		return
 
 	original_partial_message = message.channel.get_partial_message(message.id)
@@ -169,7 +170,7 @@ async def on_bulk_message_delete(messages: list[discord.Message]):
 
 @client.event
 async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Member, discord.User]):
-	if reaction.message.channel not in mishnet1:
+	if reaction.message.channel not in [channel for group in mishnet_channels for channel in group]:
 		return
 
 	if reaction.emoji == "❌":
@@ -195,7 +196,7 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 
 @client.event
 async def on_message_edit(before , after):
-	if before.channel not in mishnet1:
+	if before.channel not in [channel for group in mishnet_channels for channel in group]:
 		return
 	if before.author.bot:
 		return
