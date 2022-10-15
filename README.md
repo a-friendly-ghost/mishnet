@@ -22,6 +22,6 @@ finished and working!:
 not coded yet:
 - message database
   - which will allow all replies, editing, and deleting to work on messages sent before the last bot restart
-- reactions (not even sure yet how we'll do this)
+- reactions (vague plan now in place for how we'll do this)
 
 this will be updated as the bot is developed :D
