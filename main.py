@@ -116,15 +116,20 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 	# future mish here: i am crying about it actually thanks
 	# future future mish here (multiple months later): what the actual fuck what was wrong with you (me)
 
-	to_send += ' ' + ' '.join([attachment.url for attachment in message.attachments])
+	to_send += ' ' + ' '.join([f"<{attachment.url}>" for attachment in message.attachments]) # users agreed that replies embedding caused unnecessary clutter
 	return to_send
 
 async def bridge(original_message: discord.Message, target_channel: discord.TextChannel, name: str, pfp: discord.Asset, content_override = False):
 	webhook = await get_webhook_for_channel(target_channel)
+
 	if content_override:
 		to_send = content_override
 	else:
 		to_send = await create_to_send(original_message, target_channel)
+
+	# create reaction view if necessary
+	original_message.reaction
+
 	copy_message = await webhook.send(
 		allowed_mentions=discord.AllowedMentions.none(), 
 		content=to_send, 
