@@ -127,9 +127,6 @@ async def bridge(original_message: discord.Message, target_channel: discord.Text
 	else:
 		to_send = await create_to_send(original_message, target_channel)
 
-	# create reaction view if necessary
-	original_message.reaction
-
 	copy_message = await webhook.send(
 		allowed_mentions=discord.AllowedMentions.none(), 
 		content=to_send, 
