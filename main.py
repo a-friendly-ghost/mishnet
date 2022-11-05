@@ -9,7 +9,7 @@ import traceback
 load_dotenv()
 
 # instantiate client
-client = discord.Client()
+client = discord.Client(intents=discord.Intents.all())
 global associations
 associations = MessageAssociations()
 
@@ -79,8 +79,7 @@ async def on_message(message: discord.Message):
 	
 	target_channels = [i for i in mishnet_channel if i.guild != message.channel.guild]
 	name = message.author.name + ', from ' + serverNames[message.channel]
-	pfp = message.author.avatar_url
-
+	pfp = message.author.display_avatar.url
  	# run every message sending thingy in parallel
 	await asyncio.gather(*[bridge(message , channel , name , pfp) for channel in target_channels])
 
@@ -89,11 +88,13 @@ async def on_message(message: discord.Message):
 		to_send = "bridge time: " + str(endTime - startTime)
 		loop = asyncio.get_event_loop()
 		for channel in mishnet_channel:
-			loop.create_task(bridge(message, channel, name, client.user.avatar_url, content_override=to_send)) # is this a bad way to do this
+			loop.create_task(bridge(message, channel, name, client.user.display_avatar.url, content_override=to_send)) # is this a bad way to do this
 
 async def create_to_send(message: discord.Message, target_channel: discord.TextChannel) -> str:
 	# i know this is not the most compact way to write this function, but it's the cleanest and nicest imo. optimise it if you want
 	to_send = ''
+
+	#to_send += '```'
 	
 	if message.reference:
 		replied_message = await message.channel.fetch_message(message.reference.message_id)
@@ -106,8 +107,14 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 
 		replied_partial_message = message.channel.get_partial_message(replied_message.id)
 		link_url = replied_partial_message.jump_url
+		
+		reply_text = replied_message.content
+		
+		reply_text = re.sub(r"(https?:\/\/[^ \n]+)" , r"<\1>" , reply_text) # unembeds a link inside the quote block -- thank u taswelll for the help!
 
-		to_send += f"> **{re.sub(', from .*', '', replied_message.author.name)}** [{link_text}]({link_url})" + '\n> ' + replied_message.content.replace('\n','\n> ') + '\n' # fstring cannot contain a backslash???
+		reply_text += ' ' + ' '.join([f"<{attachment.url}>" for attachment in replied_message.attachments])
+
+		to_send += f"> **{re.sub(', from .*', '', replied_message.author.name)}** [{link_text}]({link_url})" + '\n> ' + reply_text.replace('\n','\n> ') + '\n' # fstring cannot contain a backslash???
 
 	to_send += message.content
 	
@@ -116,7 +123,10 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 	# future mish here: i am crying about it actually thanks
 	# future future mish here (multiple months later): what the actual fuck what was wrong with you (me)
 
-	to_send += ' ' + ' '.join([f"<{attachment.url}>" for attachment in message.attachments]) # users agreed that replies embedding caused unnecessary clutter
+	to_send += ' ' + ' '.join([attachment.url for attachment in message.attachments])
+	
+	#to_send += '```'
+	
 	return to_send
 
 async def bridge(original_message: discord.Message, target_channel: discord.TextChannel, name: str, pfp: discord.Asset, content_override = False):
