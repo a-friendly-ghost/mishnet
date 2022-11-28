@@ -22,16 +22,18 @@ async def on_ready():
 	ccjserver = client.get_channel(629816294870351884)
 	hallowspeak = client.get_channel(986616150492323840)
 	prolangs = client.get_channel(988876878582546472)
+	meriakcottage = client.get_channel(1046824467055263824)
 
 	mishserver2 = client.get_channel(1006522289048784967)
 	agonyserver2 = client.get_channel(1006237275664949349)
 	cpserver2 = client.get_channel(1006522209872920618)
 	hallowspeak2 = client.get_channel(1006526679071596574)
 	prolangs2 = client.get_channel(1006660045511086080)
+	meriakcottage2 = client.get_channel(964755175770325002)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver , agonyserver , cpserver , ccjserver , hallowspeak , prolangs] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , hallowspeak2 , prolangs2] # general
+	mishnet1 = [mishserver , agonyserver , cpserver , ccjserver , hallowspeak , prolangs , meriakcottage] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , hallowspeak2 , prolangs2 , meriakcottage2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	global serverNames
@@ -41,13 +43,15 @@ async def on_ready():
 		cpserver : 'conphon',
 		ccjserver : 'ccj',
 		hallowspeak : 'Hallowspeak',
-		
 		prolangs : 'prolangs',
+		meriakcottage : 'mɛriak cottage',
+
 		mishserver2 : 'mishserver',
 		agonyserver2 : 'agonyserver',
 		cpserver2 : 'conphon',
 		hallowspeak2 : 'Hallowspeak',
-		prolangs2 : 'prolangs'
+		prolangs2 : 'prolangs',
+		meriakcottage2 : 'mɛriak cottage'
 	}
 
 	global banlist
@@ -222,6 +226,8 @@ class SuperCoolReactionView(discord.ui.View):
 
 @client.event
 async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Member, discord.User]):
+	#FIXME: X-reaction is out of date. should mirror on_message_delete but doesn't
+	
 	print("reaction addded!!!!!dd")
 
 	if reaction.message.channel not in [channel for group in mishnet_channels for channel in group]:
