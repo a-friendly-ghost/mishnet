@@ -1,8 +1,8 @@
-from multiprocessing.connection import Client
 import discord, io, os, random, sys, time, asyncio, re
 from dotenv import load_dotenv
-from message_associations import MessageAssociations
+from imstupid import MessageAssociations, TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError
 from typing import Union
+from collections import Counter
 import traceback
 
 # load environment variables
@@ -10,7 +10,6 @@ load_dotenv()
 
 # instantiate client
 client = discord.Client(intents=discord.Intents.all())
-global associations
 associations = MessageAssociations()
 
 @client.event
@@ -64,8 +63,16 @@ async def on_message(message: discord.Message):
 		if message.channel in group:
 			mishnet_channel = group
 
-	if message.author.bot or not mishnet_channel:
+	if not mishnet_channel:
 		return
+
+	if message.webhook_id: # avoids unnecessarily checking all this
+		channelWebhooks = await message.channel.webhooks()
+		for webhook in channelWebhooks:
+			if webhook.id == message.webhook_id:
+				if webhook.token:
+					# this webhook is from mishnet
+					return
 
 	if message.author.id in banlist:
 		try:
@@ -81,7 +88,13 @@ async def on_message(message: discord.Message):
 	name = message.author.name + ', from ' + serverNames[message.channel]
 	pfp = message.author.display_avatar.url
  	# run every message sending thingy in parallel
-	await asyncio.gather(*[bridge(message , channel , name , pfp) for channel in target_channels])
+	duplicate_messages = await asyncio.gather(*[bridge(message , channel , name , pfp) for channel in target_channels])
+	try:
+		associations.set_duplicates(message, duplicate_messages)
+	except TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError:
+		# fuck shit piss delete them all again ig
+		print('deleting messages in to be deleted')
+		await asyncio.gather(*[message.delete() for message in duplicate_messages])
 
 	if message.content == "perftest":
 		endTime = time.perf_counter()
@@ -125,6 +138,7 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 
 	to_send += ' ' + ' '.join([attachment.url for attachment in message.attachments])
 	
+	# for debugging
 	#to_send += '```'
 	
 	return to_send
@@ -145,7 +159,7 @@ async def bridge(original_message: discord.Message, target_channel: discord.Text
 		wait=True,
 	)
 	assert copy_message is not None
-	associations.add_copy(original_message.channel.get_partial_message(original_message.id), target_channel.get_partial_message(copy_message.id))
+	return copy_message
 
 async def get_webhook_for_channel(channel: discord.TextChannel):
 	# webhooks that we own have a non-None token attribute
@@ -158,20 +172,29 @@ async def get_webhook_for_channel(channel: discord.TextChannel):
 
 @client.event
 async def on_message_delete(message: discord.Message):
+	print(f"Discord Deleted Event(tm): {message.content} in {message.channel.name}")
+
+	# FIXME: factor into is_mishnet_channel()
 	if message.channel not in [channel for group in mishnet_channels for channel in group]: # i actually fucking hate that this is how you do this
 		return
 
-	original_partial_message = message.channel.get_partial_message(message.id)
-	
-	if original_partial_message not in associations.internal:
+	if message not in associations:
+		associations.remove(message)
 		return
 
-	try:
-		await asyncio.gather(*[associated_partial_message.delete() for associated_partial_message in associations.retrieve_others(original_partial_message)])
-		# this is both to clean up the database, and also so that it can check whether the message has already been deleted, so it doesn't try to delete it again
-		associations.internal.pop(original_partial_message)
-	except discord.errors.NotFound:
-		pass
+ 	# ensure we have original message (mod may have deleted duplicate message)
+	original_message = associations.to_original(message)
+	duplicates = associations.get_duplicates_of(original_message)
+
+	# now we can remove it (AFTER fetching the duplicates, IDIOT)
+	associations.remove(message)
+
+	async def delete(message):
+		try:
+			await message.delete()
+		except discord.errors.NotFound:
+			pass
+	await asyncio.gather(*[delete(duplicate) for duplicate in duplicates])
 
 @client.event
 async def on_bulk_message_delete(messages: list[discord.Message]):
@@ -180,31 +203,56 @@ async def on_bulk_message_delete(messages: list[discord.Message]):
 			associated_message = await associated_message.channel.fetch_message(associated_message_id)
 			await associated_message.delete()
 
+def total_reactions(message: discord.Message) -> Counter[str]:
+	counter = Counter[str]()
+	all_message = associations.retrieve_others(message) + [message]
+	for message in all_message:
+		for reaction in message.reactions:
+			counter[reaction.emoji] += reaction.count
+	return counter
+
+		# just for displaying data. no business logic allowed!!! >:(((
+class SuperCoolReactionView(discord.ui.View):
+	def __init__(self, reaction_counts: Counter[str]):
+		super().__init__()
+		# add button for each reaction thingy
+		# FIXME: what about max items?
+		for emoji, count in reaction_counts.items():
+			self.add_item(discord.ui.Button(label=count, emoji=emoji, disabled=True))
+
 @client.event
 async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Member, discord.User]):
+	print("reaction addded!!!!!dd")
+
 	if reaction.message.channel not in [channel for group in mishnet_channels for channel in group]:
 		return
 
+	# FIXME: maybe we can just delete whatever message was reacted to, and then let the on_message_delete handler handle the rest?
 	if reaction.emoji == "❌":
-
 		reacted_partial_message = reaction.message.channel.get_partial_message(reaction.message.id)
 
-		if reacted_partial_message not in associations.internal:
+		if reacted_partial_message not in associations:
 			return
 
-		# partialMessage:s don't have a .author attribute, so i need to convert it to a normal Message. how efficiential
-		original_message = await associations.retrieve_others(reacted_partial_message)[0].fetch() # the first one in the value list is also the key
+		# partialMessage's don't have a .author attribute, so i need to convert it to a normal Message. how efficiential
+		original_message = await associations.to_original.fetch()
 		if original_message.author.id != member.id: # message.author is a user, so i compare ids
 			if isinstance(member, discord.Member) and discord.Permissions.manage_messages not in reaction.message.channel.permissions_for(member):
 				return
 
+		associations.remove(original_message)
+
 		try:
 			await asyncio.gather(*[associated_partial_message.delete() for associated_partial_message in [*associations.retrieve_others(reacted_partial_message), reacted_partial_message]])
-			assert associations.retrieve_others(reacted_partial_message)[0] in associations.keys() # i think so
-			associations.internal.pop(associations.retrieve_others(reacted_partial_message)[0]) 
 			# this is both to clean up the database, and also so that it can check whether the message has already been deleted, so it doesn't try to delete it again
 		except discord.errors.NotFound:
 			pass
+
+	print("mmm yes adding view")
+	reactions = total_reactions(reaction.message)
+	view = SuperCoolReactionView(reactions)
+	messages = associations.retrieve_others(reaction.message) + [reaction.message]
+	await asyncio.gather(*[message.edit(view=view) for message in messages])
 
 @client.event
 async def on_message_edit(before , after):
@@ -221,9 +269,9 @@ async def on_message_edit(before , after):
 		webhook = await get_webhook_for_channel(partial_message.channel)
 		toEdit = await create_to_send(after_message , partial_message.channel)
 		await webhook.edit_message(partial_message.id, content=toEdit)
-
 	try:
-		await asyncio.gather(*[edit_copy(associated_partial_message , after) for associated_partial_message in associations.retrieve_others(original_partial_message)])
+		duplicate_messages = associations.get_duplicates_of(original_partial_message)
+		await asyncio.gather(*[edit_copy(m , after) for m in duplicate_messages])
 	except discord.errors.Forbidden as e: # idk why the error is happening so, cope # future mish here, i think i fixed this so this error will never happen, but idk can't be too safe
 		print(e)
 		pass
@@ -241,7 +289,7 @@ async def on_error(event, *args, **kwargs):
 
 	exception_type, exception, exc_traceback = sys.exc_info()
 	messages = [
-		"oopsie doopsie! da http went fucky wucky! {}",
+		"oopsie doopsie! da code went fucky wucky! {}",
 		"oopsie woopsie our code kitty is hard at work: {}",
 		"when the exception is sus: {}",
 		"the compiler explaining why {}:\nhttps://tenor.com/bGzoN.gif",
