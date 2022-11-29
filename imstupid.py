@@ -18,10 +18,8 @@ class MessageAssociations:
         """Call this when you've just finished bridging a message"""
         if original_message in self._to_be_removed:
             self._to_be_removed.remove(original_message)
-            print(f"WE DID THE THING! {original_message.id=}")
             raise TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError()
         else:
-            print(f"set duplicates of {original_message.id} {original_message.content}")
             self._internal[original_message] = duplicate_messages
     
     def get_duplicates_of(self, original_message: PartialMessage):
@@ -36,7 +34,8 @@ class MessageAssociations:
                 if original_or_duplicate_message in duplicates:
                     return [partial_message for partial_message in duplicates if partial_message.id != original_or_duplicate_message.id] + [original]
         
-        assert False, "You should already be sure this was in associations. very pythonic i know"
+        return [] # this is for when you try to reply to a message before the last bot restart.
+        # it needs to return an empty list so that next() shoves it to the default value of "link not found"
 
     def to_original(self, original_or_duplicate: PartialMessage):
         for original, duplicates in self._internal.items():
@@ -49,8 +48,6 @@ class MessageAssociations:
     def remove(self, original_message: PartialMessage):
         """Call this when an original message has been deleted. Handles out-of-sync-ness."""
         if original_message in self._internal:
-            print(f"removing original message {original_message.id}")
             del self._internal[original_message]
         else:
-            print("REMOVE THE THING (thing of course being {original_message.id})!!!")
             self._to_be_removed.append(original_message)

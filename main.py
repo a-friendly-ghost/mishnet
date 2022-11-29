@@ -97,7 +97,6 @@ async def on_message(message: discord.Message):
 		associations.set_duplicates(message, duplicate_messages)
 	except TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError:
 		# fuck shit piss delete them all again ig
-		print('deleting messages in to be deleted')
 		await asyncio.gather(*[message.delete() for message in duplicate_messages])
 
 	if message.content == "perftest":
@@ -176,8 +175,6 @@ async def get_webhook_for_channel(channel: discord.TextChannel):
 
 @client.event
 async def on_message_delete(message: discord.Message):
-	print(f"Discord Deleted Event(tm): {message.content} in {message.channel.name}")
-
 	# FIXME: factor into is_mishnet_channel()
 	if message.channel not in [channel for group in mishnet_channels for channel in group]: # i actually fucking hate that this is how you do this
 		return
