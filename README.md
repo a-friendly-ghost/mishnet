@@ -16,12 +16,14 @@ finished and working!:
 - deleting*
 - deleting webhook messages with a :x: react*
 - allowing multiple mishnet channels
+- bot bridging
+- tupperbox and pluralkit support
 
 *to messages sent after the last bot restart
 
 not coded yet:
 - message database
   - which will allow all replies, editing, and deleting to work on messages sent before the last bot restart
-- reactions (vague plan now in place for how we'll do this)
+- reactions (half finished!!)
 
 this will be updated as the bot is developed :D
