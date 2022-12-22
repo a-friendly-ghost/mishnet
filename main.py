@@ -50,6 +50,7 @@ async def on_ready():
 		mishserver2 : 'mishserver',
 		agonyserver2 : 'agonyserver',
 		cpserver2 : 'conphon',
+		ccjserver2: 'ccj',
 		hallowspeak2 : 'Hallowspeak',
 		prolangs2 : 'prolangs',
 		meriakcottage2 : 'mɛriak cottage'
