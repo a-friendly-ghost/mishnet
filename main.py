@@ -23,6 +23,7 @@ async def on_ready():
 	hallowspeak = client.get_channel(986616150492323840)
 	prolangs = client.get_channel(988876878582546472)
 	meriakcottage = client.get_channel(1046824467055263824)
+	noellecord = client.get_channel(1058818319890792588)
 
 	mishserver2 = client.get_channel(1006522289048784967)
 	agonyserver2 = client.get_channel(1006237275664949349)
@@ -31,10 +32,11 @@ async def on_ready():
 	hallowspeak2 = client.get_channel(1006526679071596574)
 	prolangs2 = client.get_channel(1006660045511086080)
 	meriakcottage2 = client.get_channel(964755175770325002)
+	noellecord2 = client.get_channel(1058818153192366171)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver , agonyserver , cpserver , ccjserver , hallowspeak , prolangs , meriakcottage] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2] # general
+	mishnet1 = [mishserver , agonyserver , cpserver , ccjserver , hallowspeak , prolangs , meriakcottage , noellecord] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , noellecord2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	global serverNames
@@ -46,6 +48,7 @@ async def on_ready():
 		hallowspeak : 'Hallowspeak',
 		prolangs : 'prolangs',
 		meriakcottage : 'mɛriak cottage',
+		noellecord : 'nocord',
 
 		mishserver2 : 'mishserver',
 		agonyserver2 : 'agonyserver',
@@ -53,13 +56,13 @@ async def on_ready():
 		ccjserver2: 'ccj',
 		hallowspeak2 : 'Hallowspeak',
 		prolangs2 : 'prolangs',
-		meriakcottage2 : 'mɛriak cottage'
+		meriakcottage2 : 'mɛriak cottage',
+		noellecord2 : 'nocord'
 	}
 
 	global banlist
-	kaz = 806608196406870027
 	kafka = 708095054748844082
-	banlist = [kaz, kafka]
+	banlist = [kafka]
 
 @client.event
 async def on_message(message: discord.Message):
