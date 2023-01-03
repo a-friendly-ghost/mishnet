@@ -12,6 +12,8 @@ load_dotenv()
 client = discord.Client(intents=discord.Intents.all())
 associations = MessageAssociations()
 
+mishnet_channels = None
+
 @client.event
 async def on_ready():
 	print(f'{client.user} has connected to Discord!')
@@ -67,6 +69,9 @@ async def on_ready():
 @client.event
 async def on_message(message: discord.Message):
 
+	while mishnet_channels == None:
+		asyncio.sleep(0.1)
+
 	mishnet_channel = None
 	for group in mishnet_channels: # feeling like this would be another application for the associations data structure, but we made it only work for storing messages
 		if message.channel in group:
@@ -114,8 +119,6 @@ async def on_message(message: discord.Message):
 async def create_to_send(message: discord.Message, target_channel: discord.TextChannel) -> str:
 	# i know this is not the most compact way to write this function, but it's the cleanest and nicest imo. optimise it if you want
 	to_send = ''
-
-	#to_send += '```'
 	
 	if message.reference:
 		replied_message = await message.channel.fetch_message(message.reference.message_id)
@@ -131,11 +134,15 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 		
 		reply_text = replied_message.content
 		
-		reply_text = re.sub(r"(https?:\/\/[^ \n]+)" , r"<\1>" , reply_text) # unembeds a link inside the quote block -- thank u taswelll for the help!
+		reply_text = re.sub(r"(?<!\]\()(?<!<)(https?:\/\/[^ \n]+)" , r"<\1>" , reply_text) # unembeds a link inside the quote block -- thank u taswelll for the help!
+		# future mish: thank you taswelll for fixing your own code when it broke!
 
 		reply_text += ' ' + ' '.join([f"<{attachment.url}>" for attachment in replied_message.attachments])
 
-		to_send += f"> **{re.sub(', from .*', '', replied_message.author.name)}** [{link_text}]({link_url})" + '\n> ' + reply_text.replace('\n','\n> ') + '\n' # fstring cannot contain a backslash???
+		# me on my way to modify code to make it less compact
+		to_send += f'> **{re.sub(", from .*" , "" , replied_message.author.name)}** [{link_text}]({link_url})'
+		to_send += ''.join([ ('\n> '+line) for line in reply_text.split('\n') ])
+		to_send += '\n'
 
 	to_send += message.content
 	
@@ -146,8 +153,8 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 
 	to_send += ' ' + ' '.join([attachment.url for attachment in message.attachments])
 	
-	# for debugging
-	#to_send += '```'
+	if 'mishdebug' in to_send:
+		to_send = '```' + repr(to_send.replace('```','')) + '```'
 	
 	return to_send
 
@@ -218,9 +225,10 @@ def total_reactions(message: discord.Message) -> Counter[str]:
 	return counter
 
 		# just for displaying data. no business logic allowed!!! >:(((
+# why did you indent that linus
 class SuperCoolReactionView(discord.ui.View):
 	def __init__(self, reaction_counts: Counter[str]):
-		super().__init__()
+		super().__init__() # omg super() i learnt what that does like a week ago
 		# add button for each reaction thingy
 		# FIXME: what about max items?
 		for emoji, count in reaction_counts.items():
@@ -260,7 +268,7 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 	reactions = total_reactions(reaction.message)
 	view = SuperCoolReactionView(reactions)
 	messages = associations.retrieve_others(reaction.message) + [reaction.message]
-	await asyncio.gather(*[message.edit(view=view) for message in messages])
+	return await asyncio.gather(*[message.edit(view=view) for message in messages])
 
 @client.event
 async def on_message_edit(before , after):
@@ -284,6 +292,14 @@ async def on_message_edit(before , after):
 		print(e)
 		pass
 
+# it goes here. fuck you
+messages = [
+	"oopsie doopsie! da code went fucky wucky! {}",
+	"oopsie woopsie our code kitty is hard at work: {}",
+	"when the exception is sus: {}",
+	"the compiler explaining why {}:\nhttps://tenor.com/bGzoN.gif",
+	"exception messag {} e (sussy)" # added spaces around the exception, now it looks intentional
+]
 @client.event
 async def on_error(event, *args, **kwargs):
 	# FIXME: this is _the_ most horrible way to find the channel. please for the love of god fix this
@@ -293,17 +309,12 @@ async def on_error(event, *args, **kwargs):
 			break
 	else:
 		# no channel to send error message to, cope
-		return
+		return	
 
 	exception_type, exception, exc_traceback = sys.exc_info()
-	messages = [
-		"oopsie doopsie! da code went fucky wucky! {}",
-		"oopsie woopsie our code kitty is hard at work: {}",
-		"when the exception is sus: {}",
-		"the compiler explaining why {}:\nhttps://tenor.com/bGzoN.gif",
-		"exception messag {} e (sussy)" # added spaces around the exception, now it looks intentional
-	]
-	await channel.send(random.choice(messages).format(str(exception)))
+
+	if channel  in [i for group in mishnet_channels for i in group]: # mishnet keeps clogging general
+		await channel.send(random.choice(messages).format(str(exception)))
 
  	# this is just hackish debugging
 	traceback.print_exception(exception_type, exception, exc_traceback)
