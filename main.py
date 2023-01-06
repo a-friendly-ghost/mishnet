@@ -70,7 +70,7 @@ async def on_ready():
 async def on_message(message: discord.Message):
 
 	while mishnet_channels == None:
-		asyncio.sleep(0.1)
+		await asyncio.sleep(0.1)
 
 	mishnet_channel = None
 	for group in mishnet_channels: # feeling like this would be another application for the associations data structure, but we made it only work for storing messages
@@ -272,10 +272,12 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 
 @client.event
 async def on_message_edit(before , after):
-	if before.channel not in [channel for group in mishnet_channels for channel in group]:
-		return
-	if before.author.bot:
-		return
+	print('gay sex (debug)')
+	if before.content == after.content: return
+	# a message embedding counts triggers on message edit, which is cringe but this solves that
+
+	if before.channel not in [channel for group in mishnet_channels for channel in group]: return
+	if before.author.bot: return
 
 	assert before.id == after.id
 
