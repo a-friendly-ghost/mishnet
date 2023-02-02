@@ -26,6 +26,7 @@ async def on_ready():
 	prolangs = client.get_channel(988876878582546472)
 	meriakcottage = client.get_channel(1046824467055263824)
 	noellecord = client.get_channel(1058818319890792588)
+	digiserver = client.get_channel(1070736308806373457)
 
 	mishserver2 = client.get_channel(1006522289048784967)
 	agonyserver2 = client.get_channel(1006237275664949349)
@@ -35,10 +36,11 @@ async def on_ready():
 	prolangs2 = client.get_channel(1006660045511086080)
 	meriakcottage2 = client.get_channel(964755175770325002)
 	noellecord2 = client.get_channel(1058818153192366171)
+	digiserver2 = client.get_channel(1070736404155478137)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver , agonyserver , cpserver , ccjserver , hallowspeak , prolangs , meriakcottage , noellecord] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , noellecord2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  noellecord ,  digiserver] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , noellecord2 , digiserver2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	global serverNames
@@ -51,6 +53,7 @@ async def on_ready():
 		prolangs : 'prolangs',
 		meriakcottage : 'mɛriak cottage',
 		noellecord : 'nocord',
+		digiserver : 'digiserver',
 
 		mishserver2 : 'mishserver',
 		agonyserver2 : 'agonyserver',
@@ -59,7 +62,8 @@ async def on_ready():
 		hallowspeak2 : 'Hallowspeak',
 		prolangs2 : 'prolangs',
 		meriakcottage2 : 'mɛriak cottage',
-		noellecord2 : 'nocord'
+		noellecord2 : 'nocord',
+		digiserver2 : 'digiserver'
 	}
 
 	global banlist
@@ -129,6 +133,7 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 		else:
 			link_text = 'link'
 
+		# there is zero need to get the partial message here
 		replied_partial_message = message.channel.get_partial_message(replied_message.id)
 		link_url = replied_partial_message.jump_url
 		
