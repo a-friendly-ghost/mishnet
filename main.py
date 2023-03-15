@@ -27,6 +27,7 @@ async def on_ready():
 	meriakcottage = client.get_channel(1046824467055263824)
 	noellecord = client.get_channel(1058818319890792588)
 	digiserver = client.get_channel(1070736308806373457)
+	merrycord = client.get_channel(1085661170637226124)
 
 	mishserver2 = client.get_channel(1006522289048784967)
 	agonyserver2 = client.get_channel(1006237275664949349)
@@ -37,10 +38,11 @@ async def on_ready():
 	meriakcottage2 = client.get_channel(964755175770325002)
 	noellecord2 = client.get_channel(1058818153192366171)
 	digiserver2 = client.get_channel(1070736404155478137)
+	merrycord2 = client.get_channel(1085661144573816842)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  noellecord ,  digiserver] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , noellecord2 , digiserver2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  noellecord ,  digiserver , merrycord] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , noellecord2 , digiserver2 , merrycord2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	global serverNames
@@ -54,6 +56,7 @@ async def on_ready():
 		meriakcottage : 'mɛriak cottage',
 		noellecord : 'nocord',
 		digiserver : 'digiserver',
+		merrycord : 'merrycord',
 
 		mishserver2 : 'mishserver',
 		agonyserver2 : 'agonyserver',
@@ -63,7 +66,8 @@ async def on_ready():
 		prolangs2 : 'prolangs',
 		meriakcottage2 : 'mɛriak cottage',
 		noellecord2 : 'nocord',
-		digiserver2 : 'digiserver'
+		digiserver2 : 'digiserver',
+		merrycord2 : 'merrycord'
 	}
 
 	global banlist
