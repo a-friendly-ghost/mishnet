@@ -54,7 +54,7 @@ async def on_ready():
 		hallowspeak : 'Hallowspeak',
 		prolangs : 'prolangs',
 		meriakcottage : 'mɛriak cottage',
-		noellecord : 'nocord',
+		noellecord : 'noellecord',
 		digiserver : 'digiserver',
 		merrycord : 'merrycord',
 
@@ -65,7 +65,7 @@ async def on_ready():
 		hallowspeak2 : 'Hallowspeak',
 		prolangs2 : 'prolangs',
 		meriakcottage2 : 'mɛriak cottage',
-		noellecord2 : 'nocord',
+		noellecord2 : 'noellecord',
 		digiserver2 : 'digiserver',
 		merrycord2 : 'merrycord'
 	}
