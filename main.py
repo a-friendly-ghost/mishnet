@@ -303,10 +303,19 @@ async def on_message_edit(before , after):
 	async def edit_copy(partial_message: discord.PartialMessage , after_message: discord.Message):
 		webhook = await get_webhook_for_channel(partial_message.channel)
 		toEdit = await create_to_send(after_message , partial_message.channel)
-		await webhook.edit_message(partial_message.id, content=toEdit)
+		wait_time = 0
+		while wait_time < 2:
+			try:
+				return await webhook.edit_message(partial_message.id, content=toEdit)
+			except:
+				asyncio.wait(0.1)
+				wait_time += 0.1
+				print('edit waited')
+		return await partial_message.channel.send('the edit timed out') # fuck you i'll put error handling wherever i want to
+		
 	try:
 		duplicate_messages = associations.get_duplicates_of(original_partial_message)
-		await asyncio.gather(*[edit_copy(m , after) for m in duplicate_messages])
+		await asyncio.gather(*[asyncio.wait_for(edit_copy(m , after), ) for m in duplicate_messages])
 	except discord.errors.Forbidden as e: # idk why the error is happening so, cope # future mish here, i think i fixed this so this error will never happen, but idk can't be too safe
 		print(e)
 		pass
