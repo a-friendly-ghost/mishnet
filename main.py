@@ -315,7 +315,7 @@ async def on_message_edit(before , after):
 		
 	try:
 		duplicate_messages = associations.get_duplicates_of(original_partial_message)
-		await asyncio.gather(*[asyncio.wait_for(edit_copy(m , after), ) for m in duplicate_messages])
+		await asyncio.gather(*[edit_copy(m , after) for m in duplicate_messages])
 	except discord.errors.Forbidden as e: # idk why the error is happening so, cope # future mish here, i think i fixed this so this error will never happen, but idk can't be too safe
 		print(e)
 		pass
