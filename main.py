@@ -80,7 +80,8 @@ async def on_ready():
 
 	global banlist
 	kafka = 708095054748844082
-	banlist = [kafka]
+	mimubot = 493716749342998541
+	banlist = [kafka, mimubot]
 
 @client.event
 async def on_message(message: discord.Message):
@@ -310,7 +311,7 @@ async def on_message_edit(before , after):
 		try:
 			duplicate_messages = associations.get_duplicates_of(original_partial_message)
 			return await asyncio.gather(*[edit_copy(m , after) for m in duplicate_messages])
-		except discord.errors.Forbidden as e: # idk why the error is happening so, cope # future mish here, i think i fixed this so this error will never happen, but idk can't be too safe
+		except:
 			await asyncio.wait(0.1)
 			wait_time += 0.1
 			print('edit waited')
