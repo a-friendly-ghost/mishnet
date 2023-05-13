@@ -168,8 +168,6 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 	to_send = re.sub(r"https://discord(?:app)?.com/channels/(\d+)/(\d+)/(\d+)", lambda x : next((copy.jump_url for copy in associations.retrieve_others( discord.PartialMessage(channel=client.get_channel(int(x.group(2))) , id=int(x.group(3))) ) if copy.channel.id == target_channel.id),"link not found"), to_send)
 	# future mish here: i am crying about it actually thanks
 	# future future mish here (multiple months later): what the actual fuck what was wrong with you (me)
-
-	to_send += ' ' + ' '.join([attachment.url for attachment in message.attachments])
 	
 	if 'mishdebug' in to_send:
 		to_send = '```' + repr(to_send.replace('```','')) + '```'
@@ -190,6 +188,7 @@ async def bridge(original_message: discord.Message, target_channel: discord.Text
 		username=name, 
 		avatar_url=pfp, 
 		wait=True,
+		files=[attachment.to_file for attachment in original_message.attachments]
 	)
 	assert copy_message is not None
 	return copy_message
@@ -312,7 +311,7 @@ async def on_message_edit(before , after):
 			duplicate_messages = associations.get_duplicates_of(original_partial_message)
 			return await asyncio.gather(*[edit_copy(m , after) for m in duplicate_messages])
 		except:
-			await asyncio.wait(0.1)
+			await asyncio.sleep(0.1)
 			wait_time += 0.1
 			print('edit waited')
 	raise TimeoutError
@@ -342,6 +341,7 @@ async def on_error(event, *args, **kwargs):
 		await channel.send(random.choice(messages).format(str(exception)))
 
  	# this is just hackish debugging
+	print('on error exception:')
 	traceback.print_exception(exception_type, exception, exc_traceback)
 
 # start bot
