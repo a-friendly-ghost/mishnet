@@ -188,7 +188,7 @@ async def bridge(original_message: discord.Message, target_channel: discord.Text
 		username=name, 
 		avatar_url=pfp, 
 		wait=True,
-		files=[attachment.to_file for attachment in original_message.attachments]
+		files=[attachment.to_file() for attachment in original_message.attachments]
 	)
 	assert copy_message is not None
 	return copy_message
