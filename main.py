@@ -312,20 +312,20 @@ async def on_message_edit(before , after):
 	original_partial_message = before.channel.get_partial_message(before.id) # converts before (discord.Message) into a discord.PartialMessage
 
 	async def edit_copy(partial_message: discord.PartialMessage , after_message: discord.Message):
-		webhook = await get_webhook_for_channel(partial_message.channel)
-		toEdit = await create_to_send(after_message , partial_message.channel)
-		return await webhook.edit_message(partial_message.id, content=toEdit)
+		wait_time = 0
+		while wait_time < 5:
+			try:
+				webhook = await get_webhook_for_channel(partial_message.channel)
+				toEdit = await create_to_send(after_message , partial_message.channel)
+				return await webhook.edit_message(partial_message.id, content=toEdit)
+			except:
+				await asyncio.sleep(0.2)
+				wait_time += 0.2
+				print('edit waited')
+		raise TimeoutError
 
-	wait_time = 0
-	while wait_time < 2:	
-		try:
-			duplicate_messages = associations.get_duplicates_of(original_partial_message)
-			return await asyncio.gather(*[edit_copy(m , after) for m in duplicate_messages])
-		except:
-			await asyncio.sleep(0.1)
-			wait_time += 0.1
-			print('edit waited')
-	raise TimeoutError
+	duplicate_messages = associations.get_duplicates_of(original_partial_message)
+	return await asyncio.gather(*[edit_copy(m , after) for m in duplicate_messages])
 
 # it goes here. fuck you
 messages = [
