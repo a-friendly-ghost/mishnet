@@ -184,17 +184,23 @@ async def bridge(original_message: discord.Message, target_channel: discord.Text
 
 	if original_message.attachments:
 		attachments_to_files = await asyncio.gather(*[attachment.to_file() for attachment in original_message.attachments])
+		copy_message = await webhook.send(
+			allowed_mentions=discord.AllowedMentions.none(), 
+			content=to_send, 
+			username=name, 
+			avatar_url=pfp, 
+			wait=True,
+			files=attachments_to_files
+		)
 	else:
-		attachments_to_files = None
-
-	copy_message = await webhook.send(
-		allowed_mentions=discord.AllowedMentions.none(), 
-		content=to_send, 
-		username=name, 
-		avatar_url=pfp, 
-		wait=True,
-		files=attachments_to_files
-	)
+		copy_message = await webhook.send(
+			allowed_mentions=discord.AllowedMentions.none(), 
+			content=to_send, 
+			username=name, 
+			avatar_url=pfp, 
+			wait=True,
+		)
+	
 	assert copy_message is not None
 	return copy_message
 
