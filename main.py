@@ -137,12 +137,12 @@ async def on_message(message: discord.Message):
 				await message.channel.send(f"{bridge_time}s")
 
 	if message.content.startswith(prefix+'help') or message.content.startswith(prefix+'info'):
-		await message.channel.send
-		(f"""
+		return await message.channel.send(f"""
 		__mishnet commands:__
 		{prefix}help - sends this message (alias: {prefix}info)
 		{prefix}perftest - tests bridge performance time
 		{prefix}nick [nick here] - changes your mishnet nickname (alias: {prefix}nickname)
+		{prefix}nick - tells you how other servers see your name (alias: {prefix}nicktest)
 		{prefix}clearnick - resets your mishnet nickname to use your username
 		the []s aren't part of the command
 		""")
@@ -150,8 +150,15 @@ async def on_message(message: discord.Message):
 	if message.content == prefix + "uwu": #vitally important command
 		await message.channel.send('uwu')
 
-	if message.content.startswith(prefix+"nick") or message.content.startswith(prefix+"nickname"):
+	if message.content.startswith(prefix+"nick") or message.content.startswith(prefix+"nickname"): # both nick(change) and nick(test)
 		nick = message.content.replace(prefix+"nick ",'')
+
+		if message.content == prefix+"nick" or message.content.replace(prefix+"nick",'') == 'test': # nick(test) command
+			other_server_name = await get_mishnick_or_username(conn, message.author)
+			return await message.channel.send(f"hi!!! your name will be seen by people on other servers as {other_server_name} ! :D")
+
+		# nick(change) command
+
 		if len(nick) > 32:
 			return await message.channel.send('sorry, a mishnet nickname can only be a maximum of 32 characters long')
 		
@@ -380,7 +387,11 @@ async def on_message_edit(before , after):
 		delay = 0.2
 		while wait_time < 5:
 			try:
-				return associations.get_duplicates_of(original_partial_message)
+				duplicates = associations.get_duplicates_of(original_partial_message)
+				if duplicates == None:
+					pass
+				else:
+					return duplicates
 			except:
 				exception_type, exception, exc_traceback = sys.exc_info()
 				traceback.print_exception(exception_type, exception, exc_traceback)
