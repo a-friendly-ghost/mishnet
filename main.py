@@ -439,7 +439,7 @@ async def start_everything():
 	print('starting')
 
 	global conn
-	conn = await psycopg.AsyncConnection.connect(f"dbname=mishnet user=postgres password={os.getenv('PASSWORD')}")
+	conn = await psycopg.AsyncConnection.connect(f"dbname=mishnet user={os.getenv('DBUSER')} password={os.getenv('PASSWORD')}")
 
 	print('database connected')
 
