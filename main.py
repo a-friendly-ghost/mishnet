@@ -1,9 +1,10 @@
 import discord, io, os, random, sys, time, asyncio, re
 from dotenv import load_dotenv
-from imstupid import MessageAssociations, TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError
+from imstupid import MessageAssociations, TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError, get_mishnick_or_username
 from typing import Union
 from collections import Counter
 import traceback
+import psycopg
 
 # load environment variables
 load_dotenv()
@@ -11,11 +12,16 @@ load_dotenv()
 # instantiate client
 client = discord.Client(intents=discord.Intents.all())
 associations = MessageAssociations()
+prefix = 'mn!'
 
 mishnet_channels = None
 
+asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())	
+
 @client.event
 async def on_ready():
+	print('on ready begin')
+
 	print(f'{client.user} has connected to Discord!')
 
 	mishserver = client.get_channel(915251024174940160)
@@ -94,44 +100,84 @@ async def on_message(message: discord.Message):
 		if message.channel in group:
 			mishnet_channel = group
 
-	if not mishnet_channel:
-		return
+			if message.webhook_id: # avoids unnecessarily checking all this
+				channelWebhooks = await message.channel.webhooks()
+				for webhook in channelWebhooks:
+					if webhook.id == message.webhook_id:
+						if webhook.token:
+							# this webhook is from mishnet
+							return
 
-	if message.webhook_id: # avoids unnecessarily checking all this
-		channelWebhooks = await message.channel.webhooks()
-		for webhook in channelWebhooks:
-			if webhook.id == message.webhook_id:
-				if webhook.token:
-					# this webhook is from mishnet
-					return
+			if message.author.id in banlist:
+				try:
+					await message.delete()
+				except:
+					pass
+				return
 
-	if message.author.id in banlist:
-		try:
-			await message.delete()
-		except:
-			pass
-		return
+			if message.content == prefix + "perftest": 
+				startTime = time.perf_counter()
+			
+			target_channels = [i for i in mishnet_channel if i.guild != message.channel.guild]
 
-	if message.content == "perftest": 
-		startTime = time.perf_counter()
+			name = await get_mishnick_or_username(conn, message.author) + ', from ' + serverNames[message.channel]
+
+			pfp = message.author.display_avatar.url
+			# run every message sending thingy in parallel
+			duplicate_messages = await asyncio.gather(*[bridge(message , channel , name , pfp) for channel in target_channels])
+			try:
+				associations.set_duplicates(message, duplicate_messages)
+			except TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError:
+				# fuck shit piss delete them all again ig
+				await asyncio.gather(*[message.delete() for message in duplicate_messages])
+
+			if message.content == prefix + "perftest":
+				endTime = time.perf_counter()
+				bridge_time = "bridge time: " + str(endTime - startTime)
+				await message.channel.send(f"{bridge_time}s")
+
+	if message.content.startswith(prefix+'help') or message.content.startswith(prefix+'info'):
+		await message.channel.send
+		(f"""
+		__mishnet commands:__
+		{prefix}help - sends this message (alias: {prefix}info)
+		{prefix}perftest - tests bridge performance time
+		{prefix}nick [nick here] - changes your mishnet nickname (alias: {prefix}nickname)
+		{prefix}clearnick - resets your mishnet nickname to use your username
+		the []s aren't part of the command
+		""")
 	
-	target_channels = [i for i in mishnet_channel if i.guild != message.channel.guild]
-	name = message.author.name + ', from ' + serverNames[message.channel]
-	pfp = message.author.display_avatar.url
- 	# run every message sending thingy in parallel
-	duplicate_messages = await asyncio.gather(*[bridge(message , channel , name , pfp) for channel in target_channels])
-	try:
-		associations.set_duplicates(message, duplicate_messages)
-	except TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError:
-		# fuck shit piss delete them all again ig
-		await asyncio.gather(*[message.delete() for message in duplicate_messages])
+	if message.content == prefix + "uwu": #vitally important command
+		await message.channel.send('uwu')
 
-	if message.content == "perftest":
-		endTime = time.perf_counter()
-		to_send = "bridge time: " + str(endTime - startTime)
-		loop = asyncio.get_event_loop()
-		for channel in mishnet_channel:
-			loop.create_task(bridge(message, channel, name, client.user.display_avatar.url, content_override=to_send)) # is this a bad way to do this
+	if message.content.startswith(prefix+"nick") or message.content.startswith(prefix+"nickname"):
+		nick = message.content.replace(prefix+"nick ",'')
+		if len(nick) > 32:
+			return await message.channel.send('sorry, a mishnet nickname can only be a maximum of 32 characters long')
+		
+		async with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
+			await cursor.execute('SELECT user_id, nickname FROM nicknames WHERE user_id = %s' , [message.author.id])
+			record = await cursor.fetchone()
+			if record:
+				await cursor.execute(f"UPDATE nicknames SET nickname=%s WHERE user_id=%s" , [nick,message.author.id])
+			else:
+				await cursor.execute(f"INSERT INTO nicknames (user_id, nickname) VALUES (%s, %s)" , [message.author.id,nick])
+
+		await conn.commit()
+		await message.channel.send(f'hello {nick}! i have set your mishnet (me) nickname as {nick} c:')
+
+	if message.content.startswith(prefix+"clearnick"):
+		async with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
+			await cursor.execute('SELECT user_id, nickname FROM nicknames WHERE user_id = %s' , [message.author.id])
+			record = await cursor.fetchone()
+			if record:
+				await cursor.execute(f"DELETE FROM nicknames WHERE user_id=%s",[message.author.id])
+				await message.channel.send(f'your mishnet nickname has been cleared, {message.author.name}! it will now show up to others as your discord username ^-^')
+			else:
+				await message.channel.send(f'{message.author.name}, your mishnet nickname is already the default (your username) ! :p')
+		await conn.commit()
+
+	return
 
 async def create_to_send(message: discord.Message, target_channel: discord.TextChannel) -> str:
 	# i know this is not the most compact way to write this function, but it's the cleanest and nicest imo. optimise it if you want
@@ -158,7 +204,10 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 		reply_text += ' ' + ' '.join([f"<{attachment.url}>" for attachment in replied_message.attachments])
 
 		# me on my way to modify code to make it less compact
-		to_send += f'> **{re.sub(", from .*" , "" , replied_message.author.name)}** [{link_text}]({link_url})'
+
+		repliee_name = await get_mishnick_or_username(conn, replied_message.author)
+
+		to_send += f'> **{re.sub(", from .*" , "" , repliee_name)}** [{link_text}]({link_url})'
 		to_send += ''.join([ ('\n> '+line) for line in reply_text.split('\n') ])
 		to_send += '\n'
 
@@ -313,18 +362,36 @@ async def on_message_edit(before , after):
 
 	async def edit_copy(partial_message: discord.PartialMessage , after_message: discord.Message):
 		wait_time = 0
+		delay = 0.2
 		while wait_time < 5:
 			try:
 				webhook = await get_webhook_for_channel(partial_message.channel)
 				toEdit = await create_to_send(after_message , partial_message.channel)
 				return await webhook.edit_message(partial_message.id, content=toEdit)
 			except:
-				await asyncio.sleep(0.2)
-				wait_time += 0.2
-				print('edit waited')
-		raise TimeoutError
+				exception_type, exception, exc_traceback = sys.exc_info()
+				traceback.print_exception(exception_type, exception, exc_traceback)
+				await asyncio.sleep(delay)
+				wait_time += delay
+		# should raise an error here
+		
+	async def get_duplicates_timeout():
+		wait_time = 0
+		delay = 0.2
+		while wait_time < 5:
+			try:
+				return associations.get_duplicates_of(original_partial_message)
+			except:
+				exception_type, exception, exc_traceback = sys.exc_info()
+				traceback.print_exception(exception_type, exception, exc_traceback)
+				await asyncio.sleep(delay)
+				wait_time += delay
+		# should raise an error here
 
-	duplicate_messages = associations.get_duplicates_of(original_partial_message)
+	#todo: fix this code repetition
+	
+	duplicate_messages = await get_duplicates_timeout()
+
 	return await asyncio.gather(*[edit_copy(m , after) for m in duplicate_messages])
 
 # it goes here. fuck you
@@ -356,4 +423,14 @@ async def on_error(event, *args, **kwargs):
 	traceback.print_exception(exception_type, exception, exc_traceback)
 
 # start bot
-client.run(os.getenv('TOKEN'))
+async def start_everything():
+	print('starting')
+
+	global conn
+	conn = await psycopg.AsyncConnection.connect(f"dbname=mishnet user=postgres password={os.getenv('PASSWORD')}")
+
+	print('database connected')
+
+	await client.start(os.getenv('TOKEN'))
+
+asyncio.run(start_everything())

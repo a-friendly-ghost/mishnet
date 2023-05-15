@@ -1,7 +1,11 @@
 from collections import defaultdict
-from discord import PartialMessage
+from discord import PartialMessage, Member
+import psycopg, asyncio, inspect, traceback, sys
 
 class TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError(Exception):
+    pass
+
+class MishnetTimeout(Exception):
     pass
 
 # FIXME: do we need to compare by ids?
@@ -51,3 +55,14 @@ class MessageAssociations:
             del self._internal[original_message]
         else:
             self._to_be_removed.append(original_message)
+
+async def get_mishnick_or_username(connection: psycopg.AsyncConnection, author: Member):
+    async with connection.cursor(row_factory=psycopg.rows.dict_row) as cursor:
+                await cursor.execute('SELECT user_id, nickname FROM nicknames WHERE user_id = %s' , [author.id])
+                record = await cursor.fetchone()
+                if record == None:
+                    return author.name
+                else:
+                    return record["nickname"]
+                
+    #it should probably raise an error here
