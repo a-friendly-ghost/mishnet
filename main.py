@@ -88,7 +88,8 @@ async def on_ready():
 	global banlist
 	kafka = 708095054748844082
 	mimubot = 493716749342998541
-	banlist = [kafka, mimubot]
+	dmitrij = 239165690232307713
+	banlist = [kafka, mimubot, dmitrij]
 
 @client.event
 async def on_message(message: discord.Message):
@@ -172,7 +173,7 @@ async def on_message(message: discord.Message):
 				await cursor.execute(f"INSERT INTO nicknames (user_id, nickname) VALUES (%s, %s)" , [message.author.id,nick])
 
 		await conn.commit()
-		await message.channel.send(f'hello {nick}! i have set your mishnet (me) nickname as {nick} c:')
+		await message.channel.send(f'hello {nick}! i have set your mishnet (me) nickname as `{nick}` c:')
 
 	if message.content.startswith(prefix+"clearnick"):
 		async with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
