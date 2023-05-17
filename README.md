@@ -1,7 +1,7 @@
 haiii!! this is mishie!! c:
 
 this is mishnet! a bot that creates a shared channel between multiple servers! it's still being worked on!
-mishnet is being developed by me (mishie c:) and linus
+mishnet is being developed by me (mishie c:), with help from various other friends of mine :D
 
 here's a list of the current progress:
 
@@ -18,12 +18,17 @@ finished and working!:
 - allowing multiple mishnet channels
 - bot bridging
 - tupperbox and pluralkit support
+- image collages
+- timeouts for various actions
+- mishnet nicknames
+- mishnet commands
 
 *to messages sent after the last bot restart
 
 not coded yet:
-- message database
+- message database (just started!!)
   - which will allow all replies, editing, and deleting to work on messages sent before the last bot restart
 - reactions (half finished!!)
+- stickers bridging
 
 this will be updated as the bot is developed :D
