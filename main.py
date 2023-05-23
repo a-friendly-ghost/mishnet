@@ -430,7 +430,10 @@ async def on_error(event, *args, **kwargs):
 	exception_type, exception, exc_traceback = sys.exc_info()
 
 	if channel  in [i for group in mishnet_channels for i in group]: # mishnet keeps clogging general
-		await channel.send(random.choice(messages).format(str(exception)))
+		if str(exception).split()[0] == "429": # timeout error
+			await channel.send('hiiii sorryyyy there was a timeout errorrr :c u may want to check if your message or your edit went through')
+		else:
+			await channel.send(random.choice(messages).format(str(exception)))
 
  	# this is just hackish debugging
 	print('on error exception:')
