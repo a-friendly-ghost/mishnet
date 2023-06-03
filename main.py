@@ -96,7 +96,7 @@ async def on_ready():
 	webhooks = {}
 	for mishnet_channel in mishnet_channels:
 		for node in mishnet_channel:
-			webhooks[node] = get_webhook_for_channel(node)
+			webhooks[node] = await get_webhook_for_channel(node)
 
 	global banlist
 	kafka = 708095054748844082
