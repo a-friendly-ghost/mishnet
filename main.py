@@ -19,11 +19,18 @@ mishnet_channels = None
 if sys.platform == 'win32':
 	asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())	
 
+# hello this is mish!
+# note on the inconsistent terminology for folks reading through my shit code for some godforsaken reason
+# a "mishnet general" and "mishnet conlanging" are mishnet channels
+# just "channel" though refers to like, the discord channels, also called nodes when i remember to call them that
+
 @client.event
 async def on_ready():
 	print('on ready begin')
 
 	print(f'{client.user} has connected to Discord!')
+
+	# todo: store these more neatly
 
 	mishserver = client.get_channel(915251024174940160)
 	agonyserver = client.get_channel(746466196978794517)
@@ -85,6 +92,12 @@ async def on_ready():
 		osscord2 : 'osscord'
 	}
 
+	global webhooks
+	webhooks = {}
+	for mishnet_channel in mishnet_channels:
+		for node in mishnet_channel:
+			webhooks[node] = get_webhook_for_channel(node)
+
 	global banlist
 	kafka = 708095054748844082
 	mimubot = 493716749342998541
@@ -126,7 +139,8 @@ async def on_message(message: discord.Message):
 
 			pfp = message.author.display_avatar.url
 			# run every message sending thingy in parallel
-			duplicate_messages = await asyncio.gather(*[bridge(message , channel , name , pfp) for channel in target_channels])
+			replied_message = await get_replied_message(message)
+			duplicate_messages = await asyncio.gather(*[bridge(message , channel , replied_message , name , pfp) for channel in target_channels])
 			try:
 				associations.set_duplicates(message, duplicate_messages)
 			except TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError:
@@ -188,23 +202,25 @@ async def on_message(message: discord.Message):
 
 	return
 
-async def create_to_send(message: discord.Message, target_channel: discord.TextChannel) -> str:
+async def get_replied_message(original_message: discord.Message) -> discord.Message:
+	replied_message_reference = original_message.reference
+	if replied_message_reference:
+		return await original_message.channel.fetch_message(replied_message_reference.message_id)
+	else:
+		return None
+
+async def create_to_send(message: discord.Message, target_channel: discord.TextChannel, replied_message) -> str:
 	# i know this is not the most compact way to write this function, but it's the cleanest and nicest imo. optimise it if you want
 	to_send = ''
 	
-	if message.reference:
-		replied_message = await message.channel.fetch_message(message.reference.message_id)
-
+	if replied_message:
 		funny = random.randint(1,100)
 		if funny == 1: # i'm really funny
 			link_text = 'zelda'
 		else:
 			link_text = 'link'
 
-		# there is zero need to get the partial message here
-		replied_partial_message = message.channel.get_partial_message(replied_message.id)
-		link_url = replied_partial_message.jump_url
-		
+		link_url = replied_message.jump_url
 		reply_text = replied_message.content
 		
 		reply_text = re.sub(r"(?<!\]\()(?<!<)(https?:\/\/[^ \n]+)" , r"<\1>" , reply_text) # unembeds a link inside the quote block -- thank u taswelll for the help!
@@ -213,9 +229,7 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 		reply_text += ' ' + ' '.join([f"<{attachment.url}>" for attachment in replied_message.attachments])
 
 		# me on my way to modify code to make it less compact
-
 		repliee_name = await get_mishnick_or_username(conn, replied_message.author)
-
 		to_send += f'> **{re.sub(", from .*" , "" , repliee_name)}** [{link_text}]({link_url})'
 		to_send += ''.join([ ('\n> '+line) for line in reply_text.split('\n') ])
 		to_send += '\n'
@@ -232,13 +246,10 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 	
 	return to_send
 
-async def bridge(original_message: discord.Message, target_channel: discord.TextChannel, name: str, pfp: discord.Asset, content_override = False):
-	webhook = await get_webhook_for_channel(target_channel)
+async def bridge(original_message: discord.Message, target_channel: discord.TextChannel, replied_message, name: str, pfp: discord.Asset):
+	webhook = webhooks[target_channel]
 
-	if content_override:
-		to_send = content_override
-	else:
-		to_send = await create_to_send(original_message, target_channel)
+	to_send = await create_to_send(original_message, target_channel, replied_message)
 
 	if original_message.attachments:
 		attachments_to_files = await asyncio.gather(*[attachment.to_file() for attachment in original_message.attachments])
@@ -302,7 +313,7 @@ async def on_bulk_message_delete(messages: list[discord.Message]):
 			associated_message = await associated_message.channel.fetch_message(associated_message_id)
 			await associated_message.delete()
 
-def total_reactions(message: discord.Message) -> Counter[str]:
+def total_reactions(message: discord.Message) -> Counter[str]: # DEVELOPMENT ON HOLD
 	counter = Counter[str]()
 	all_message = associations.retrieve_others(message) + [message]
 	for message in all_message:
@@ -369,14 +380,14 @@ async def on_message_edit(before , after):
 
 	original_partial_message = before.channel.get_partial_message(before.id) # converts before (discord.Message) into a discord.PartialMessage
 
-	async def edit_copy(partial_message: discord.PartialMessage , after_message: discord.Message):
+	async def edit_copy(partial_to_edit: discord.PartialMessage , after_message: discord.Message, replied_message):
 		wait_time = 0
 		delay = 0.2
 		while wait_time < 5:
 			try:
-				webhook = await get_webhook_for_channel(partial_message.channel)
-				toEdit = await create_to_send(after_message , partial_message.channel)
-				return await webhook.edit_message(partial_message.id, content=toEdit)
+				webhook = webhooks[partial_to_edit.channel]
+				toEdit = await create_to_send(after_message , partial_to_edit.channel, replied_message)
+				return await webhook.edit_message(partial_to_edit.id, content=toEdit)
 			except:
 				exception_type, exception, exc_traceback = sys.exc_info()
 				traceback.print_exception(exception_type, exception, exc_traceback)
@@ -404,8 +415,8 @@ async def on_message_edit(before , after):
 	#todo: fix this code repetition
 	
 	duplicate_messages = await get_duplicates_timeout()
-
-	return await asyncio.gather(*[edit_copy(m , after) for m in duplicate_messages])
+	replied_message = await get_replied_message(after)
+	return await asyncio.gather(*[edit_copy(m , after, replied_message) for m in duplicate_messages])
 
 # it goes here. fuck you
 messages = [
