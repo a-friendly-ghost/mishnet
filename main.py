@@ -25,6 +25,7 @@ if sys.platform == 'win32':
 # just "channel" though refers to like, the discord channels, also called nodes when i remember to call them that
 
 ready = False
+
 @client.event
 async def on_ready():
 	print('on ready begin')
@@ -109,6 +110,7 @@ async def on_ready():
 	dmitrij = 239165690232307713
 	banlist = [kafka, mimubot, dmitrij]
 
+	global ready
 	ready = True
 	print('on ready end')
 
