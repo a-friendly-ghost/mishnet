@@ -24,6 +24,7 @@ if sys.platform == 'win32':
 # a "mishnet general" and "mishnet conlanging" are mishnet channels
 # just "channel" though refers to like, the discord channels, also called nodes when i remember to call them that
 
+ready = False
 @client.event
 async def on_ready():
 	print('on ready begin')
@@ -63,6 +64,8 @@ async def on_ready():
 	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , noellecord2 , digiserver2 , merrycord2 , ostracod2 , osscord2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
+	print('all channels gotten')
+
 	global serverNames
 	serverNames = {
 		mishserver : 'mishserver',
@@ -98,16 +101,21 @@ async def on_ready():
 		for node in mishnet_channel:
 			webhooks[node] = await get_webhook_for_channel(node)
 
+	print('all webhooks cached')
+
 	global banlist
 	kafka = 708095054748844082
 	mimubot = 493716749342998541
 	dmitrij = 239165690232307713
 	banlist = [kafka, mimubot, dmitrij]
 
+	ready = True
+	print('on ready end')
+
 @client.event
 async def on_message(message: discord.Message):
 
-	while mishnet_channels == None:
+	while ready == False:
 		await asyncio.sleep(0.1)
 
 	mishnet_channel = None
