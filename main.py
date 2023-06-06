@@ -41,7 +41,6 @@ async def on_ready():
 	hallowspeak = client.get_channel(986616150492323840)
 	prolangs = client.get_channel(988876878582546472)
 	meriakcottage = client.get_channel(1046824467055263824)
-	noellecord = client.get_channel(1058818319890792588)
 	digiserver = client.get_channel(1070736308806373457)
 	merrycord = client.get_channel(1085661170637226124)
 	ostracod = client.get_channel(1093661502084493422)
@@ -55,7 +54,6 @@ async def on_ready():
 	hallowspeak2 = client.get_channel(1006526679071596574)
 	prolangs2 = client.get_channel(1006660045511086080)
 	meriakcottage2 = client.get_channel(964755175770325002)
-	noellecord2 = client.get_channel(1058818153192366171)
 	digiserver2 = client.get_channel(1070736404155478137)
 	merrycord2 = client.get_channel(1085661144573816842)
 	ostracod2 = client.get_channel(1093661477111611443)
@@ -63,8 +61,8 @@ async def on_ready():
 	conserver2 = client.get_channel(1114983094630490133)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  noellecord ,  digiserver , merrycord , ostracod , osscord , conserver] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , noellecord2 , digiserver2 , merrycord2 , ostracod2 , osscord2 , conserver2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  digiserver , merrycord , ostracod , osscord , conserver] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , digiserver2 , merrycord2 , ostracod2 , osscord2 , conserver2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	print('all channels gotten')
@@ -78,7 +76,6 @@ async def on_ready():
 		hallowspeak : 'Hallowspeak',
 		prolangs : 'prolangs',
 		meriakcottage : 'mɛriak cottage',
-		noellecord : 'noellecord',
 		digiserver : 'digiserver',
 		merrycord : 'merrycord',
 		ostracod : 'ostracod conlangs',
@@ -92,7 +89,6 @@ async def on_ready():
 		hallowspeak2 : 'Hallowspeak',
 		prolangs2 : 'prolangs',
 		meriakcottage2 : 'mɛriak cottage',
-		noellecord2 : 'noellecord',
 		digiserver2 : 'digiserver',
 		merrycord2 : 'merrycord',
 		ostracod2 : 'ostracod conlangs',
