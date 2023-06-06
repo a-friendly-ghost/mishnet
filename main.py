@@ -46,6 +46,7 @@ async def on_ready():
 	ostracod = client.get_channel(1093661502084493422)
 	osscord = client.get_channel(1099099975369101385)
 	conserver = client.get_channel(1114983071083667657)
+	marciland = client.get_channel(1115636041475440750)
 
 	mishserver2 = client.get_channel(1006522289048784967)
 	agonyserver2 = client.get_channel(1006237275664949349)
@@ -59,10 +60,11 @@ async def on_ready():
 	ostracod2 = client.get_channel(1093661477111611443)
 	osscord2 = client.get_channel(1099099944054444067)
 	conserver2 = client.get_channel(1114983094630490133)
+	marciland2 = client.get_channel(1115635971216650271)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  digiserver , merrycord , ostracod , osscord , conserver] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , digiserver2 , merrycord2 , ostracod2 , osscord2 , conserver2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  digiserver , merrycord , ostracod , osscord , conserver , marciland] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , digiserver2 , merrycord2 , ostracod2 , osscord2 , conserver2 , marciland2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	print('all channels gotten')
@@ -81,6 +83,7 @@ async def on_ready():
 		ostracod : 'ostracod conlangs',
 		osscord : 'osscord',
 		conserver : 'conserver',
+		marciland : 'marciland' ,
 
 		mishserver2 : 'mishserver',
 		agonyserver2 : 'agonyserver',
@@ -93,7 +96,8 @@ async def on_ready():
 		merrycord2 : 'merrycord',
 		ostracod2 : 'ostracod conlangs',
 		osscord2 : 'osscord',
-		conserver2 : 'conserver'
+		conserver2 : 'conserver',
+		marciland2 : 'marciland'
 	}
 
 	global webhooks
