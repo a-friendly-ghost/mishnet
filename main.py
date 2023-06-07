@@ -113,7 +113,8 @@ async def on_ready():
 	mimubot = 493716749342998541
 	dmitrij = 239165690232307713
 	echo = 472692106150805505
-	banlist = [kafka, mimubot, dmitrij, echo]
+	yuphph = 127243394559770624
+	banlist = [kafka, mimubot, dmitrij, echo, yuphph]
 
 	global ready
 	ready = True
