@@ -187,7 +187,7 @@ async def on_message(message: discord.Message):
 		await message.channel.send('uwu')
 
 	if message.content.startswith(prefix+"nick") or message.content.startswith(prefix+"nickname"): # both nick(change) and nick(test)
-		nick = message.content.replace(prefix+"nick ",'')
+		nick = message.content.replace(prefix+"nick ",'').replace(prefix+"nickname",'') # this is a bad (ugly) way to do this i think i should write a function
 
 		if message.content == prefix+"nick" or message.content.replace(prefix+"nick",'') == 'test': # nick(test) command
 			other_server_name = await get_mishnick_or_username(conn, message.author)
@@ -460,6 +460,7 @@ async def on_error(event, *args, **kwargs):
 	exception_type, exception, exc_traceback = sys.exc_info()
 
 	if channel  in [i for group in mishnet_channels for i in group]: # mishnet keeps clogging general
+		# specific errors
 		if str(exception).split()[0] == "429": # timeout error
 			await channel.send('hiiii sorryyyy there was a timeout errorrr :c u may want to check if your message or your edit went through')
 		else:
