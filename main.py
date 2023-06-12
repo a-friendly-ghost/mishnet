@@ -134,11 +134,17 @@ async def on_ready():
 	print('on ready end')
 
 async def get_replied_message(original_message: discord.Message) -> discord.Message:
+
 	replied_message_reference = original_message.reference
 	if replied_message_reference:
 		return await original_message.channel.fetch_message(replied_message_reference.message_id)
-	else:
-		return None
+	
+	if original_message.embeds:
+		regex_result = re.search(r"\[\*\*Reply to: \*\*\]\((.+)\)" , original_message.embeds[0].description)
+		if regex_result:
+			return await original_message.channel.fetch_message(regex_result.group(1))
+		
+	return None
 
 async def create_to_send(message: discord.Message, target_channel: discord.TextChannel, replied_message) -> str:
 	# i know this is not the most compact way to write this function, but it's the cleanest and nicest imo. optimise it if you want
@@ -157,11 +163,11 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 		reply_text = re.sub(r"(?<!\]\()(?<!<)(https?:\/\/[^ \n]+)" , r"<\1>" , reply_text) # unembeds a link inside the quote block -- thank u taswelll for the help!
 		# future mish: thank you taswelll for fixing your own code when it broke!
 
-		reply_text += ' ' + ' '.join([f"<{attachment.url}>" for attachment in replied_message.attachments])
+		reply_text += ' ' + ' '.join([f"[🖼️]({attachment.url})" for attachment in replied_message.attachments])
 
 		# me on my way to modify code to make it less compact
 		repliee_name = await get_mishnick_or_username(conn, replied_message.author)
-		to_send += f'> **{re.sub(", from .*" , "" , repliee_name)}** [{link_text}]({link_url})'
+		to_send += f'> **{re.sub(r", from .*" , "" , repliee_name)}** [{link_text}]({link_url})'
 		to_send += ''.join([ ('\n> '+line) for line in reply_text.split('\n') ])
 		to_send += '\n'
 
