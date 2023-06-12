@@ -140,9 +140,10 @@ async def get_replied_message(original_message: discord.Message) -> discord.Mess
 		return await original_message.channel.fetch_message(replied_message_reference.message_id)
 	
 	if original_message.embeds:
-		regex_result = re.search(r"\[\*\*Reply to: \*\*\]\((.+)\)" , original_message.embeds[0].description)
+		print(original_message.embeds[0].description)
+		regex_result = re.search(r"\[(?:Reply to:|\(click to see attachment\))\]\(https://discord(?:app)?.com/channels/(\d+)/(\d+)/(\d+)\)" , original_message.embeds[0].description)
 		if regex_result:
-			return await original_message.channel.fetch_message(regex_result.group(1))
+			return await original_message.channel.fetch_message(regex_result.group(3)) # create_to_send() will do the job of translating this into the version of the message from each server
 		
 	return None
 
@@ -163,7 +164,7 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 		reply_text = re.sub(r"(?<!\]\()(?<!<)(https?:\/\/[^ \n]+)" , r"<\1>" , reply_text) # unembeds a link inside the quote block -- thank u taswelll for the help!
 		# future mish: thank you taswelll for fixing your own code when it broke!
 
-		reply_text += ' ' + ' '.join([f"[🖼️]({attachment.url})" for attachment in replied_message.attachments])
+		reply_text += ' ' + ' '.join([f"[(🖼️)](<{attachment.url}>)" for attachment in replied_message.attachments])
 
 		# me on my way to modify code to make it less compact
 		repliee_name = await get_mishnick_or_username(conn, replied_message.author)
@@ -207,6 +208,15 @@ async def on_message(message: discord.Message):
 	while ready == False:
 		await asyncio.sleep(0.1)
 
+	# ensure not bridging bridged messages themselves or responding to bridged commands
+	if message.webhook_id: # avoids unnecessarily checking all this
+		channelWebhooks = await message.channel.webhooks()
+		for webhook in channelWebhooks:
+			if webhook.id == message.webhook_id:
+				if webhook.token:
+					# this webhook is from mishnet
+					return
+
 	# commands
 
 	if message.content.startswith(prefix+'help') or message.content.startswith(prefix+'info'):
@@ -215,7 +225,7 @@ async def on_message(message: discord.Message):
 		{prefix}help - sends this message (alias: {prefix}info)
 		{prefix}perftest - tests bridge performance time
 		{prefix}nick [nick here] - changes your mishnet nickname (alias: {prefix}nickname)
-		{prefix}nick - tells you how other servers see your name (alias: {prefix}nicktest)
+		{prefix}nick - tells you how other servers see your name (aliases: {prefix}nicktest , {prefix}nickname)
 		{prefix}clearnick - resets your mishnet nickname to use your username
 		the []s aren't part of the command
 		""")
@@ -223,14 +233,13 @@ async def on_message(message: discord.Message):
 	if message.content == prefix + "uwu": #vitally important command
 		await message.channel.send('uwu')
 
-	if message.content.startswith(prefix+"nick") or message.content.startswith(prefix+"nickname"): # both nick(change) and nick(test)
+	# oh my god please write a separate function for aliases
+	if message.content == prefix+"nick" or message.content == prefix+"nickname" or message.content == prefix+"nicktest": # nick(test) command
+		other_server_name = await get_mishnick_or_username(conn, message.author)
+		await message.channel.send(f"hi!!! your name will be seen by people on other servers as {other_server_name} ! :D")
+
+	elif message.content.startswith(prefix+"nick") or message.content.startswith(prefix+"nickname"): # nick(change) command
 		nick = message.content.replace(prefix+"nick ",'').replace(prefix+"nickname",'') # this is a bad (ugly) way to do this i think i should write a function
-
-		if message.content == prefix+"nick" or message.content.replace(prefix+"nick",'') == 'test': # nick(test) command
-			other_server_name = await get_mishnick_or_username(conn, message.author)
-			await message.channel.send(f"hi!!! your name will be seen by people on other servers as {other_server_name} ! :D")
-
-		# nick(change) command
 
 		if len(nick) > 32:
 			await message.channel.send('sorry, a mishnet nickname can only be a maximum of 32 characters long')
@@ -262,15 +271,6 @@ async def on_message(message: discord.Message):
 	mishnet_channel = next( (channel_group for channel_group in mishnet_channels if message.channel in channel_group) , None ) # feeling like this would be another application for the associations data structure, but we made it only work for storing messages
 	if not mishnet_channel:
 		return	
-
-	# ensure not bridging bridged messages themselves
-	if message.webhook_id: # avoids unnecessarily checking all this
-		channelWebhooks = await message.channel.webhooks()
-		for webhook in channelWebhooks:
-			if webhook.id == message.webhook_id:
-				if webhook.token:
-					# this webhook is from mishnet
-					return
 
 	if message.author.id in banlist:
 		try:
