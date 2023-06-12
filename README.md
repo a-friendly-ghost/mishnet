@@ -22,6 +22,7 @@ finished and working!:
 - timeouts for various actions
 - mishnet nicknames
 - mishnet commands
+- pluralkit replies
 
 *to messages sent after the last bot restart
 
@@ -30,5 +31,7 @@ not coded yet:
   - which will allow all replies, editing, and deleting to work on messages sent before the last bot restart
 - reactions (half finished!!)
 - stickers bridging
+- typing indicators
+- cross server pinging
 
 this will be updated as the bot is developed :D
