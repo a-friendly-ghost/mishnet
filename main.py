@@ -57,6 +57,7 @@ async def on_ready():
 	conserver = client.get_channel(1114983071083667657)
 	marciland = client.get_channel(1115636041475440750)
 	noellecord = client.get_channel(1116169661604704318)
+	primistan = client.get_channel(1118593147451211776)
 
 	mishserver2 = client.get_channel(1006522289048784967)
 	agonyserver2 = client.get_channel(1006237275664949349)
@@ -72,10 +73,11 @@ async def on_ready():
 	conserver2 = client.get_channel(1114983094630490133)
 	marciland2 = client.get_channel(1115635971216650271)
 	noellecord2 = client.get_channel(1116169602918002718)
+	primistan2 = client.get_channel(1118593123426250872)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  digiserver , merrycord , ostracod , osscord , conserver , marciland , noellecord] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , digiserver2 , merrycord2 , ostracod2 , osscord2 , conserver2 , marciland2 , noellecord2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  digiserver , merrycord , ostracod , osscord , conserver , marciland , noellecord , primistan] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , digiserver2 , merrycord2 , ostracod2 , osscord2 , conserver2 , marciland2 , noellecord2 , primistan2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	print('all channels gotten')
@@ -96,6 +98,7 @@ async def on_ready():
 		conserver : 'conserver',
 		marciland : 'marciland' ,
 		noellecord : 'noellecord',
+		primistan : 'primistan',
 
 		mishserver2 : 'mishserver',
 		agonyserver2 : 'agonyserver',
@@ -110,7 +113,8 @@ async def on_ready():
 		osscord2 : 'osscord',
 		conserver2 : 'conserver',
 		marciland2 : 'marciland',
-		noellecord2 : 'noellecord'
+		noellecord2 : 'noellecord',
+		primistan2 : 'primistan'
 	}
 
 	global webhooks
