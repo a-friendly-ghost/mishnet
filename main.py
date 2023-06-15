@@ -389,7 +389,6 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 
 @client.event
 async def on_message_edit(before , after):
-	print('gay sex (debug)')
 	if before.content == after.content: return
 	# a message embedding counts triggers on message edit, which is cringe but this solves that
 
