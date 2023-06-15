@@ -147,6 +147,28 @@ async def get_replied_message(original_message: discord.Message) -> discord.Mess
 		
 	return None
 
+def prune_replies(content: str, length_limit: int) -> str:
+
+	def find_depth(line):
+		depth = 0
+		for index in range(0, len(line)+1, 2):
+			if line[index:index+2] == '> ':
+				depth += 1
+			else:
+				return depth
+
+	lines_depths = [ ( line , find_depth(line) ) for line in content.split('\n') ]
+	max_depth = max([i[1] for i in lines_depths])
+	for current_depth in range(max_depth , 0 , -1): # goes from max_depth to *1*, not to 0, because uhhhhhhhhhhhhhhhhhhhhhhhh
+		if len( '\n'.join([i[0] for i in lines_depths]) ) < length_limit:
+			break
+		else:
+			prune_position = next(index for index , i in enumerate(lines_depths) if i[1] == current_depth)
+			lines_depths = [ (line , depth) for (line , depth) in lines_depths if depth < current_depth ]
+			lines_depths.insert(prune_position , (f"{'> '*current_depth}{max_depth-current_depth+1} more replies" , current_depth) ) # this cannot be inserted at the end because it is part of the message's length
+	
+	return '\n'.join([i[0] for i in lines_depths])
+
 async def create_to_send(message: discord.Message, target_channel: discord.TextChannel, replied_message) -> str:
 	# i know this is not the most compact way to write this function, but it's the cleanest and nicest imo. optimise it if you want
 	to_send = ''
@@ -168,12 +190,17 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 
 		# me on my way to modify code to make it less compact
 		repliee_name = await get_mishnick_or_username(conn, replied_message.author)
-		to_send += f'> **{re.sub(r", from .*" , "" , repliee_name)}** [{link_text}]({link_url})'
+		to_send += f'> **{re.sub(r", from .*" , "" , repliee_name)}** [{link_text}]({link_url})' # removes server from user's name
 		to_send += ''.join([ ('\n> '+line) for line in reply_text.split('\n') ])
 		to_send += '\n'
 
+	if message.content.startswith('> '): # separates reply quote blocks and quote blocks already in the message
+		to_send += '\n'
+
 	to_send += message.content
-	
+
+	to_send += ' ' + ' '.join(sticker.url for sticker in message.stickers)
+
 	# cry about it
 	to_send = re.sub(r"https://discord(?:app)?.com/channels/(\d+)/(\d+)/(\d+)", lambda x : next((copy.jump_url for copy in associations.retrieve_others( discord.PartialMessage(channel=client.get_channel(int(x.group(2))) , id=int(x.group(3))) ) if copy.channel.id == target_channel.id),"link not found"), to_send)
 	# future mish here: i am crying about it actually thanks
@@ -181,6 +208,9 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 	
 	if 'mishdebug' in to_send:
 		to_send = '```' + repr(to_send.replace('```','')) + '```'
+
+	if len(to_send) > 2000:
+		to_send = prune_replies(to_send , 2000)
 	
 	return to_send
 
@@ -189,7 +219,7 @@ async def bridge(original_message: discord.Message, target_channel: discord.Text
 
 	to_send = await create_to_send(original_message, target_channel, replied_message)
 
-	attachments_to_files = await asyncio.gather(*[attachment.to_file() for attachment in original_message.attachments])
+	attachments_to_files = await asyncio.gather(*[attachment.to_file(spoiler=attachment.is_spoiler()) for attachment in original_message.attachments])
 	
 	copy_message = await webhook.send(
 		allowed_mentions=discord.AllowedMentions.none(), 
