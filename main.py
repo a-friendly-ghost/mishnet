@@ -42,6 +42,7 @@ async def on_ready():
 	print(f'{client.user} has connected to Discord!')
 
 	# todo: store these more neatly
+	# oh my god mish please do this -mish
 
 	mishserver = client.get_channel(915251024174940160)
 	agonyserver = client.get_channel(746466196978794517)
@@ -57,6 +58,7 @@ async def on_ready():
 	conserver = client.get_channel(1114983071083667657)
 	marciland = client.get_channel(1115636041475440750)
 	primistan = client.get_channel(1118593147451211776)
+	kathycord = client.get_channel(1118827288641941535)
 
 	mishserver2 = client.get_channel(1006522289048784967)
 	agonyserver2 = client.get_channel(1006237275664949349)
@@ -72,10 +74,11 @@ async def on_ready():
 	conserver2 = client.get_channel(1114983094630490133)
 	marciland2 = client.get_channel(1115635971216650271)
 	primistan2 = client.get_channel(1118593123426250872)
+	kathycord2 = client.get_channel(1118827217691099226)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  digiserver , merrycord , ostracod , osscord , conserver , marciland , primistan] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , digiserver2 , merrycord2 , ostracod2 , osscord2 , conserver2 , marciland2 , primistan2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  digiserver , merrycord , ostracod , osscord , conserver , marciland , primistan , kathycord] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , digiserver2 , merrycord2 , ostracod2 , osscord2 , conserver2 , marciland2 , primistan2 , kathycord2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	print('all channels gotten')
@@ -96,6 +99,7 @@ async def on_ready():
 		conserver : 'conserver',
 		marciland : 'marciland' ,
 		primistan : 'primistan',
+		kathycord : 'kathycord',
 
 		mishserver2 : 'mishserver',
 		agonyserver2 : 'agonyserver',
@@ -110,7 +114,8 @@ async def on_ready():
 		osscord2 : 'osscord',
 		conserver2 : 'conserver',
 		marciland2 : 'marciland',
-		primistan2 : 'primistan'
+		primistan2 : 'primistan',
+		kathycord2 : 'kathycord'
 	}
 
 	global webhooks
