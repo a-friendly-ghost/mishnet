@@ -503,7 +503,6 @@ messages = [
 	"oopsie doopsie! da code went fucky wucky! {}",
 	"oopsie woopsie our code kitty is hard at work: {}",
 	"when the exception is sus: {}",
-	"the compiler explaining why {}:\nhttps://tenor.com/bGzoN.gif",
 	"exception messag {} e (sussy)" # added spaces around the exception, now it looks intentional
 ]
 @client.event
