@@ -234,6 +234,7 @@ async def bridge(
 	webhook = webhooks[target_channel]
 
 	to_send = await create_to_send(content, target_channel, replied_message, stickers)
+	attachments_to_files = await asyncio.gather(*[attachment.to_file(spoiler=attachment.is_spoiler()) for attachment in message.attachments])
 
 	copy_message = await webhook.send(
 		allowed_mentions = discord.AllowedMentions.all() if ping else discord.AllowedMentions.none(),
@@ -241,7 +242,7 @@ async def bridge(
 		username = name, 
 		avatar_url = pfp, 
 		wait = True,
-		files = attachment_files if attachment_files != [] else discord.utils.MISSING # i hate this
+		files = attachments_to_files if attachments_to_files != [] else discord.utils.MISSING # i hate this
 	)
 	
 	return copy_message
@@ -332,8 +333,7 @@ async def on_message(message: discord.Message):
 	pfp = message.author.display_avatar.url
 	# run every message sending thingy in parallel
 	replied_message = await get_replied_message(message)
-	attachments_to_files = await asyncio.gather(*[attachment.to_file(spoiler=attachment.is_spoiler()) for attachment in message.attachments])
-	duplicate_messages = await asyncio.gather(*[bridge(message.content , channel , replied_message , name , pfp , attachments_to_files , message.stickers , False) for channel in target_channels])
+	duplicate_messages = await asyncio.gather(*[bridge(message.content , channel , replied_message , name , pfp , None , message.stickers , False) for channel in target_channels])
 	try:
 		associations.set_duplicates(message, duplicate_messages)
 	except TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError:
