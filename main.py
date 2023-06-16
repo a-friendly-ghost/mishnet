@@ -144,11 +144,12 @@ async def get_replied_message(original_message: discord.Message) -> discord.Mess
 	if replied_message_reference:
 		return await original_message.channel.fetch_message(replied_message_reference.message_id)
 	
-	embed_desc = original_message.embeds[0].description
-	if embed_desc:
-		regex_result = re.search(r"\[(?:Reply to:|\(click to see attachment\))\]\(https://discord(?:app)?.com/channels/(\d+)/(\d+)/(\d+)\)" , embed_desc)
-		if regex_result:
-			return await original_message.channel.fetch_message(regex_result.group(3)) # create_to_send() will do the job of translating this into the version of the message from each server, does not need to be done heres
+	if original_message.embeds:
+		embed_desc = original_message.embeds[0].description
+		if embed_desc:
+			regex_result = re.search(r"\[(?:Reply to:|\(click to see attachment\))\]\(https://discord(?:app)?.com/channels/(\d+)/(\d+)/(\d+)\)" , embed_desc)
+			if regex_result:
+				return await original_message.channel.fetch_message(regex_result.group(3)) # create_to_send() will do the job of translating this into the version of the message from each server, does not need to be done heres
 		
 	return None
 
