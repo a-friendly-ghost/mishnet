@@ -226,7 +226,7 @@ async def bridge(
 		replied_message, 
 		name: str, 
 		pfp: discord.Asset, 
-		attachments_to_files,
+		attachments_to_files: list[discord.File],
 		stickers,
 		ping: bool, 
 		):
