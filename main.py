@@ -175,7 +175,7 @@ def prune_replies(content: str, length_limit: int) -> str:
 	
 	return '\n'.join([i[0] for i in lines_depths])
 
-async def create_to_send(message: discord.Message, target_channel: discord.TextChannel, replied_message) -> str:
+async def create_to_send(content: str, target_channel: discord.TextChannel, replied_message, stickers) -> str:
 	# i know this is not the most compact way to write this function, but it's the cleanest and nicest imo. optimise it if you want
 	to_send = ''
 	
@@ -200,12 +200,12 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 		to_send += ''.join([ ('\n> '+line) for line in reply_text.split('\n') ])
 		to_send += '\n'
 
-	if message.content.startswith('> '): # separates reply quote blocks and quote blocks already in the message
+	if content.startswith('> '): # separates reply quote blocks and quote blocks already in the message
 		to_send += '\n'
 
-	to_send += message.content
+	to_send += content
 
-	to_send += ' ' + ' '.join(sticker.url for sticker in message.stickers)
+	to_send += ' ' + ' '.join(sticker.url for sticker in stickers)
 
 	# cry about it
 	to_send = re.sub(r"https://discord(?:app)?.com/channels/(\d+)/(\d+)/(\d+)", lambda x : next((copy.jump_url for copy in associations.retrieve_others( discord.PartialMessage(channel=client.get_channel(int(x.group(2))) , id=int(x.group(3))) ) if copy.channel.id == target_channel.id),"link not found"), to_send)
@@ -220,20 +220,28 @@ async def create_to_send(message: discord.Message, target_channel: discord.TextC
 	
 	return to_send
 
-async def bridge(original_message: discord.Message, target_channel: discord.TextChannel, replied_message, name: str, pfp: discord.Asset):
+async def bridge(
+		content, 
+		target_channel: discord.TextChannel, 
+		replied_message, 
+		name: str, 
+		pfp: discord.Asset, 
+		attachment_files,
+		stickers,
+		ping: bool, 
+		):
+	
 	webhook = webhooks[target_channel]
 
-	to_send = await create_to_send(original_message, target_channel, replied_message)
+	to_send = await create_to_send(content, target_channel, replied_message, stickers)
 
-	attachments_to_files = await asyncio.gather(*[attachment.to_file(spoiler=attachment.is_spoiler()) for attachment in original_message.attachments])
-	
 	copy_message = await webhook.send(
-		allowed_mentions=discord.AllowedMentions.none(), 
-		content=to_send, 
-		username=name, 
-		avatar_url=pfp, 
-		wait=True,
-		files=attachments_to_files if attachments_to_files != [] else discord.utils.MISSING # i hate this
+		allowed_mentions = discord.AllowedMentions.all() if ping else discord.AllowedMentions.none(),
+		content = to_send, 
+		username = name, 
+		avatar_url = pfp, 
+		wait = True,
+		files = attachment_files if attachment_files != [] else discord.utils.MISSING # i hate this
 	)
 	
 	return copy_message
@@ -324,7 +332,8 @@ async def on_message(message: discord.Message):
 	pfp = message.author.display_avatar.url
 	# run every message sending thingy in parallel
 	replied_message = await get_replied_message(message)
-	duplicate_messages = await asyncio.gather(*[bridge(message , channel , replied_message , name , pfp) for channel in target_channels])
+	attachments_to_files = await asyncio.gather(*[attachment.to_file(spoiler=attachment.is_spoiler()) for attachment in message.attachments])
+	duplicate_messages = await asyncio.gather(*[bridge(message.content , channel , replied_message , name , pfp , attachments_to_files , message.stickers , False) for channel in target_channels])
 	try:
 		associations.set_duplicates(message, duplicate_messages)
 	except TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError:
@@ -360,7 +369,9 @@ async def on_message_delete(message: discord.Message):
 			await message.delete()
 		except discord.errors.NotFound:
 			pass
+
 	await asyncio.gather(*[delete(duplicate) for duplicate in duplicates])
+	return await delete(original_message)
 
 @client.event
 async def on_bulk_message_delete(messages: list[discord.Message]):
@@ -398,24 +409,38 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 
 	# FIXME: maybe we can just delete whatever message was reacted to, and then let the on_message_delete handler handle the rest?
 	if reaction.emoji == "❌":
-		reacted_partial_message = reaction.message.channel.get_partial_message(reaction.message.id)
 
-		if reacted_partial_message not in associations:
-			return
-
-		# partialMessage's don't have a .author attribute, so i need to convert it to a normal Message. how efficiential
-		original_message = await associations.to_original.fetch()
-		if original_message.author.id != member.id: # message.author is a user, so i compare ids
+		original_message = associations.to_original(reaction.message)
+		if original_message.author.id != member.id: # message.author is a User, so i compare ids
 			if isinstance(member, discord.Member) and discord.Permissions.manage_messages not in reaction.message.channel.permissions_for(member):
 				return
 
-		associations.remove(original_message)
+		return await reaction.message.delete()
+	
+	if reaction.emoji == "🔔":
 
-		try:
-			await asyncio.gather(*[associated_partial_message.delete() for associated_partial_message in [*associations.retrieve_others(reacted_partial_message), reacted_partial_message]])
-			# this is both to clean up the database, and also so that it can check whether the message has already been deleted, so it doesn't try to delete it again
-		except discord.errors.NotFound:
-			pass
+		original_message = associations.to_original(reaction.message)
+	
+		name = await get_mishnick_or_username(conn, member) + ', from ' + serverNames[reaction.message.channel]
+		pfp = member.display_avatar.url
+		
+		mishnet_channel = next(group for group in mishnet_channels if original_message.channel in group)
+		
+		messages = await asyncio.gather(*[bridge(
+				content = original_message.author.mention, 
+				target_channel = channel, 
+				replied_message = original_message, 
+				name = name, 
+				pfp = pfp, 
+				attachment_files = [], 
+				stickers = [], 
+				ping = (channel == original_message.channel)
+			) for channel in mishnet_channel])
+		
+		# ew
+		main = next(i for i in messages if i.channel == reaction.message.channel)
+		duplicates = [i for i in messages if i.channel != reaction.message.channel]
+		associations.set_duplicates(main, duplicates)
 
 	print("mmm yes adding view")
 	reactions = total_reactions(reaction.message)
@@ -441,7 +466,7 @@ async def on_message_edit(before , after):
 		while wait_time < 5:
 			try:
 				webhook = webhooks[partial_to_edit.channel]
-				toEdit = await create_to_send(after_message , partial_to_edit.channel, replied_message)
+				toEdit = await create_to_send(after_message.content , partial_to_edit.channel, replied_message, after.stickers)
 				return await webhook.edit_message(partial_to_edit.id, content=toEdit)
 			except:
 				exception_type, exception, exc_traceback = sys.exc_info()
