@@ -13,6 +13,7 @@ load_dotenv()
 client = discord.Client(intents=discord.Intents.all())
 associations = MessageAssociations()
 prefix = 'mn!'
+poll_start = 'poll:'
 
 mishnet_channels = None
 
@@ -226,7 +227,7 @@ async def bridge(
 		replied_message, 
 		name: str, 
 		pfp: discord.Asset, 
-		attachments_to_files: list[discord.File],
+		attachments: list[discord.Attachment],
 		stickers,
 		ping: bool, 
 		):
@@ -234,6 +235,7 @@ async def bridge(
 	webhook = webhooks[target_channel]
 
 	to_send = await create_to_send(content, target_channel, replied_message, stickers)
+	attachments_to_files = await asyncio.gather(*[attachment.to_file(spoiler=attachment.is_spoiler()) for attachment in attachments])
 
 	copy_message = await webhook.send(
 		allowed_mentions = discord.AllowedMentions.all() if ping else discord.AllowedMentions.none(),
@@ -271,7 +273,11 @@ async def on_message(message: discord.Message):
 		{prefix}nick [nick here] - changes your mishnet nickname (alias: {prefix}nickname)
 		{prefix}nick - tells you how other servers see your name (aliases: {prefix}nicktest , {prefix}nickname)
 		{prefix}clearnick - resets your mishnet nickname to use your username
+		{prefix}poll - creates a poll message
 		the []s aren't part of the command
+		__reaction functions:__
+		:x: - deletes a bridged message
+		:bell: - pings the person reacted to
 		""")
 	
 	if message.content == prefix + "uwu": #vitally important command
@@ -310,6 +316,9 @@ async def on_message(message: discord.Message):
 				await message.channel.send(f'{message.author.name}, your mishnet nickname is already the default (your username) ! :p')
 		await conn.commit()
 
+	if message.content == prefix + 'poll':
+		await message.channel.send(poll_start)
+
 	# bridge
 
 	mishnet_channel = next( (channel_group for channel_group in mishnet_channels if message.channel in channel_group) , None ) # feeling like this would be another application for the associations data structure, but we made it only work for storing messages
@@ -329,11 +338,20 @@ async def on_message(message: discord.Message):
 
 	name = await get_mishnick_or_username(conn, message.author) + ', from ' + serverNames[message.channel]
 	pfp = message.author.display_avatar.url
-	attachments_to_files = await asyncio.gather(*[attachment.to_file(spoiler=attachment.is_spoiler()) for attachment in message.attachments])
 	replied_message = await get_replied_message(message)
 
 	# run every message sending thingy in parallel
-	duplicate_messages = await asyncio.gather(*[bridge(message.content , channel , replied_message , name , pfp , attachments_to_files , message.stickers , False) for channel in target_channels])
+	duplicate_messages = await asyncio.gather(*[bridge(
+			content = message.content,
+			target_channel = channel,
+			replied_message = replied_message,
+			name = name,
+			pfp = pfp,
+			attachments = message.attachments,
+			stickers = message.stickers,
+			ping = False
+		) for channel in target_channels])
+	
 	try:
 		associations.set_duplicates(message, duplicate_messages)
 	except TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError:
@@ -380,16 +398,6 @@ async def on_bulk_message_delete(messages: list[discord.Message]):
 			associated_message = await associated_message.channel.fetch_message(associated_message_id)
 			await associated_message.delete()
 
-def total_reactions(message: discord.Message) -> Counter[str]: # DEVELOPMENT ON HOLD
-	counter = Counter[str]()
-	all_message = associations.retrieve_others(message) + [message]
-	for message in all_message:
-		for reaction in message.reactions:
-			counter[reaction.emoji] += reaction.count
-	return counter
-
-		# just for displaying data. no business logic allowed!!! >:(((
-# why did you indent that linus
 class SuperCoolReactionView(discord.ui.View):
 	def __init__(self, reaction_counts: Counter[str]):
 		super().__init__() # omg super() i learnt what that does like a week ago
@@ -400,12 +408,24 @@ class SuperCoolReactionView(discord.ui.View):
 
 @client.event
 async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Member, discord.User]):
-	#FIXME: X-reaction is out of date. should mirror on_message_delete but doesn't
-	
-	print("reaction addded!!!!!dd")
+	# FIXME: X-reaction is out of date. should mirror on_message_delete but doesn't
 
 	if reaction.message.channel not in [channel for group in mishnet_channels for channel in group]:
 		return
+	
+	print("reaction addded!!!!!dd")
+
+	original_message = associations.to_original(reaction.message)
+	all_messages = associations.retrieve_others(reaction.message) + [reaction.message]
+	assert len(all_messages) == len(mishnet1)
+
+	if original_message.author.id == client.user.id and reaction.message.content.startswith(poll_start):
+		
+		all_reactions = Counter()
+		for version in all_messages:
+			all_reactions.update(Counter({reaction.emoji : reaction.count for reaction in version.reactions}))
+
+		return await original_message.edit( content = poll_start+'\n'+' - '.join([f"{emoji} {count}" for emoji, count in all_reactions.items()]) )
 
 	# FIXME: maybe we can just delete whatever message was reacted to, and then let the on_message_delete handler handle the rest?
 	if reaction.emoji == "❌":
@@ -443,8 +463,7 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 		associations.set_duplicates(main, duplicates)
 
 	print("mmm yes adding view")
-	reactions = total_reactions(reaction.message)
-	view = SuperCoolReactionView(reactions)
+	view = SuperCoolReactionView(all_reactions)
 	messages = associations.retrieve_others(reaction.message) + [reaction.message]
 	return await asyncio.gather(*[message.edit(view=view) for message in messages])
 
@@ -454,7 +473,15 @@ async def on_message_edit(before , after):
 	# a message embedding counts triggers on message edit, which is cringe but this solves that
 
 	if before.channel not in [channel for group in mishnet_channels for channel in group]: return
-	if before.author.bot: return
+	
+		# ensure not editing bridged messages themselves or responding to bridged commands
+	if before.webhook_id: # avoids unnecessarily checking all this
+		channelWebhooks = await before.channel.webhooks()
+		for webhook in channelWebhooks:
+			if webhook.id == before.webhook_id:
+				if webhook.token:
+					# this webhook is from mishnet
+					return
 
 	assert before.id == after.id
 
