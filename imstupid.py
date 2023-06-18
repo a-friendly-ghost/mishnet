@@ -31,7 +31,7 @@ class MessageAssociations:
         return self._internal[original_message]
     
     def retrieve_others(self, original_or_duplicate_message: PartialMessage):
-        if original_or_duplicate_message in self._internal:
+        if original_or_duplicate_message in self._internal.keys():
             return self.get_duplicates_of(original_or_duplicate_message)
         else:
             for original, duplicates in self._internal.items():
@@ -58,11 +58,11 @@ class MessageAssociations:
 
 async def get_mishnick_or_username(connection: psycopg.AsyncConnection, author: Member):
     async with connection.cursor(row_factory=psycopg.rows.dict_row) as cursor:
-                await cursor.execute('SELECT user_id, nickname FROM nicknames WHERE user_id = %s' , [author.id])
-                record = await cursor.fetchone()
-                if record == None:
-                    return author.name
-                else:
-                    return record["nickname"]
+        await cursor.execute('SELECT user_id, nickname FROM nicknames WHERE user_id = %s' , [author.id])
+        record = await cursor.fetchone()
+        if record == None:
+            return author.name
+        else:
+            return record["nickname"]
                 
     #it should probably raise an error here

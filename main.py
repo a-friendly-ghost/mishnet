@@ -286,21 +286,21 @@ async def on_message(message: discord.Message):
 	# oh my god please write a separate function for aliases
 	if message.content == prefix+"nick" or message.content == prefix+"nickname" or message.content == prefix+"nicktest": # nick(test) command
 		other_server_name = await get_mishnick_or_username(conn, message.author)
-		await message.channel.send(f"hi!!! your name will be seen by people on other servers as {other_server_name} ! :D")
+		await message.channel.send(f"hi!!! your name is currently seen by people on other servers as {other_server_name} ! :D")
 
 	elif message.content.startswith(prefix+"nick") or message.content.startswith(prefix+"nickname"): # nick(change) command
 		nick = message.content.replace(prefix+"nick ",'').replace(prefix+"nickname",'') # this is a bad (ugly) way to do this i think i should write a function
 
 		if len(nick) > 32:
 			await message.channel.send('sorry, a mishnet nickname can only be a maximum of 32 characters long')
-		
-		async with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
-			await cursor.execute('SELECT user_id, nickname FROM nicknames WHERE user_id = %s' , [message.author.id])
-			record = await cursor.fetchone()
-			if record:
-				await cursor.execute(f"UPDATE nicknames SET nickname=%s WHERE user_id=%s" , [nick,message.author.id])
-			else:
-				await cursor.execute(f"INSERT INTO nicknames (user_id, nickname) VALUES (%s, %s)" , [message.author.id,nick])
+		else:
+			async with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
+				await cursor.execute('SELECT user_id, nickname FROM nicknames WHERE user_id = %s' , [message.author.id])
+				record = await cursor.fetchone()
+				if record:
+					await cursor.execute("UPDATE nicknames SET nickname=%s WHERE user_id=%s" , [nick,message.author.id])
+				else:
+					await cursor.execute("INSERT INTO nicknames (user_id, nickname) VALUES (%s, %s)" , [message.author.id,nick])
 
 		await conn.commit()
 		await message.channel.send(f'hello {nick}! i have set your mishnet (me) nickname as `{nick}` c:')
@@ -310,7 +310,7 @@ async def on_message(message: discord.Message):
 			await cursor.execute('SELECT user_id, nickname FROM nicknames WHERE user_id = %s' , [message.author.id])
 			record = await cursor.fetchone()
 			if record:
-				await cursor.execute(f"DELETE FROM nicknames WHERE user_id=%s",[message.author.id])
+				await cursor.execute("DELETE FROM nicknames WHERE user_id=%s",[message.author.id])
 				await message.channel.send(f'your mishnet nickname has been cleared, {message.author.name}! it will now show up to others as your discord username ^-^')
 			else:
 				await message.channel.send(f'{message.author.name}, your mishnet nickname is already the default (your username) ! :p')
@@ -416,21 +416,29 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 	print("reaction addded!!!!!dd")
 
 	original_message = associations.to_original(reaction.message)
-	all_messages = associations.retrieve_others(reaction.message) + [reaction.message]
+	all_messages = associations.get_duplicates_of(original_message) + [original_message]
+	print([message.ch for message in all_messages])
 	assert len(all_messages) == len(mishnet1)
 
 	if original_message.author.id == client.user.id and reaction.message.content.startswith(poll_start):
-		
-		all_reactions = Counter()
-		for version in all_messages:
-			all_reactions.update(Counter({reaction.emoji : reaction.count for reaction in version.reactions}))
 
-		return await original_message.edit( content = poll_start+'\n'+' - '.join([f"{emoji} {count}" for emoji, count in all_reactions.items()]) )
+		print('poll reacted')
+
+		# return await reaction.message.channel.send('\n'.join([f"{copy.channel.guild.name}: {'-'.join([f'{reaction.emoji} : {reaction.count}' for reaction in copy.reactions])}" for copy in all_messages]))
+		
+		# each_server_reactions = []
+		# for copy in all_messages:
+		# 	each_server_reactions.append( (copy.channel.guild.name , {reaction.emoji : reaction.count for reaction in copy.reactions}) )
+		# print(each_server_reactions)
+		# all_reactions = Counter()
+		# for version_reactions in each_server_reactions:
+		# 	all_reactions.update(Counter(version_reactions[1]))
+
+		# return await original_message.edit( content = poll_start+'\n'+' - '.join([f"{emoji} {count}" for emoji, count in all_reactions.items()]) )
 
 	# FIXME: maybe we can just delete whatever message was reacted to, and then let the on_message_delete handler handle the rest?
 	if reaction.emoji == "❌":
 
-		original_message = associations.to_original(reaction.message)
 		if original_message.author.id != member.id: # message.author is a User, so i compare ids
 			if isinstance(member, discord.Member) and discord.Permissions.manage_messages not in reaction.message.channel.permissions_for(member):
 				return
@@ -438,8 +446,6 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 		return await reaction.message.delete()
 	
 	if reaction.emoji == "🔔":
-
-		original_message = associations.to_original(reaction.message)
 	
 		name = await get_mishnick_or_username(conn, member) + ', from ' + serverNames[reaction.message.channel]
 		pfp = member.display_avatar.url
@@ -449,10 +455,10 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 		messages = await asyncio.gather(*[bridge(
 				content = original_message.author.mention, 
 				target_channel = channel, 
-				replied_message = original_message, 
+				replied_message = original_message,
 				name = name, 
 				pfp = pfp, 
-				attachment_files = [], 
+				attachments = [], 
 				stickers = [], 
 				ping = (channel == original_message.channel)
 			) for channel in mishnet_channel])
