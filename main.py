@@ -2,7 +2,7 @@ import discord, io, os, random, sys, time, asyncio, re
 from dotenv import load_dotenv
 from imstupid import MessageAssociations, TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError, get_mishnick_or_username
 from typing import Union
-from collections import Counter
+from collections import Counter, OrderedDict
 import traceback
 import psycopg
 
@@ -14,6 +14,7 @@ client = discord.Client(intents=discord.Intents.all())
 associations = MessageAssociations()
 prefix = 'mn!'
 poll_start = 'poll:'
+poll_queue = [] # [message , emoji , add]
 
 mishnet_channels = None
 
@@ -58,7 +59,6 @@ async def on_ready():
 	osscord = client.get_channel(1099099975369101385)
 	conserver = client.get_channel(1114983071083667657)
 	marciland = client.get_channel(1115636041475440750)
-	primistan = client.get_channel(1118593147451211776)
 	kathycord = client.get_channel(1118827288641941535)
 
 	mishserver2 = client.get_channel(1006522289048784967)
@@ -74,12 +74,11 @@ async def on_ready():
 	osscord2 = client.get_channel(1099099944054444067)
 	conserver2 = client.get_channel(1114983094630490133)
 	marciland2 = client.get_channel(1115635971216650271)
-	primistan2 = client.get_channel(1118593123426250872)
 	kathycord2 = client.get_channel(1118827217691099226)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  digiserver , merrycord , ostracod , osscord , conserver , marciland , primistan , kathycord] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , digiserver2 , merrycord2 , ostracod2 , osscord2 , conserver2 , marciland2 , primistan2 , kathycord2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  digiserver , merrycord , ostracod , osscord , conserver , marciland , kathycord] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , digiserver2 , merrycord2 , ostracod2 , osscord2 , conserver2 , marciland2 , kathycord2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	print('all channels gotten')
@@ -99,7 +98,6 @@ async def on_ready():
 		osscord : 'osscord',
 		conserver : 'conserver',
 		marciland : 'marciland' ,
-		primistan : 'primistan',
 		kathycord : 'kathycord',
 
 		mishserver2 : 'mishserver',
@@ -115,7 +113,6 @@ async def on_ready():
 		osscord2 : 'osscord',
 		conserver2 : 'conserver',
 		marciland2 : 'marciland',
-		primistan2 : 'primistan',
 		kathycord2 : 'kathycord'
 	}
 
@@ -273,7 +270,7 @@ async def on_message(message: discord.Message):
 		{prefix}nick [nick here] - changes your mishnet nickname (alias: {prefix}nickname)
 		{prefix}nick - tells you how other servers see your name (aliases: {prefix}nicktest , {prefix}nickname)
 		{prefix}clearnick - resets your mishnet nickname to use your username
-		{prefix}poll - creates a poll message
+		{prefix}poll [optional text]- creates a poll message
 		the []s aren't part of the command
 		__reaction functions:__
 		:x: - deletes a bridged message
@@ -316,8 +313,8 @@ async def on_message(message: discord.Message):
 				await message.channel.send(f'{message.author.name}, your mishnet nickname is already the default (your username) ! :p')
 		await conn.commit()
 
-	if message.content == prefix + 'poll':
-		await message.channel.send(poll_start)
+	if message.content.startswith(prefix + 'poll'):
+		await message.channel.send(poll_start + message.content.replace(prefix+'poll',''))
 
 	# bridge
 
@@ -406,37 +403,35 @@ class SuperCoolReactionView(discord.ui.View):
 		for emoji, count in reaction_counts.items():
 			self.add_item(discord.ui.Button(label=count, emoji=emoji, disabled=True))
 
+async def manage_polls():
+	# the thing we're discussing whether we should do or not
+	pass
+
 @client.event
 async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Member, discord.User]):
-	# FIXME: X-reaction is out of date. should mirror on_message_delete but doesn't
 
 	if reaction.message.channel not in [channel for group in mishnet_channels for channel in group]:
 		return
 	
-	print("reaction addded!!!!!dd")
-
-	original_message = associations.to_original(reaction.message)
-	all_messages = associations.get_duplicates_of(original_message) + [original_message]
-	print([message.ch for message in all_messages])
-	assert len(all_messages) == len(mishnet1)
+	partial_message = reaction.message.channel.get_partial_message(reaction.message.id) # converts to partial message
+	original_message = await associations.to_original(partial_message).fetch()
 
 	if original_message.author.id == client.user.id and reaction.message.content.startswith(poll_start):
 
-		print('poll reacted')
+		# parse existing message back into a dictionary
+		# this ensures reacts stay in the same order
+		poll_reactions = {i.split()[0] : int(i.split()[1]) for i in re.sub(f"{poll_start}.*(?:\n)?" , "" , reaction.message.content).split(' - ') if i != ''} # lol
 
-		# return await reaction.message.channel.send('\n'.join([f"{copy.channel.guild.name}: {'-'.join([f'{reaction.emoji} : {reaction.count}' for reaction in copy.reactions])}" for copy in all_messages]))
-		
-		# each_server_reactions = []
-		# for copy in all_messages:
-		# 	each_server_reactions.append( (copy.channel.guild.name , {reaction.emoji : reaction.count for reaction in copy.reactions}) )
-		# print(each_server_reactions)
-		# all_reactions = Counter()
-		# for version_reactions in each_server_reactions:
-		# 	all_reactions.update(Counter(version_reactions[1]))
+		if reaction.emoji in poll_reactions.keys():
+			poll_reactions[reaction.emoji] += 1
+		else:
+			poll_reactions[reaction.emoji] = 1 
 
-		# return await original_message.edit( content = poll_start+'\n'+' - '.join([f"{emoji} {count}" for emoji, count in all_reactions.items()]) )
+		poll_text = re.search(f"{poll_start}(.*)(?:\n)?" , reaction.message.content).group(1)
 
-	# FIXME: maybe we can just delete whatever message was reacted to, and then let the on_message_delete handler handle the rest?
+		to_edit = poll_start + poll_text + '\n' + ' - '.join([f"{emoji} {count}" for emoji , count in poll_reactions.items() if count > 0])
+		return await original_message.edit(content=to_edit)
+
 	if reaction.emoji == "❌":
 
 		if original_message.author.id != member.id: # message.author is a User, so i compare ids
@@ -468,10 +463,46 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 		duplicates = [i for i in messages if i.channel != reaction.message.channel]
 		associations.set_duplicates(main, duplicates)
 
-	print("mmm yes adding view")
+	all_messages = await asyncio.gather(*[partial.fetch() for partial in associations.get_duplicates_of(original_message)]) + [original_message]
+	all_reactions = {}
+	# TODO this totaling code is repeated, write a function / class ?
+	for message in all_messages:
+		for react in message.reactions:
+			if react.emoji in all_reactions.keys():
+				old_count = all_reactions[react.emoji]
+				all_reactions[react.emoji] = old_count + react.count
+			else:
+				all_reactions[react.emoji] = react.count 
+
 	view = SuperCoolReactionView(all_reactions)
-	messages = associations.retrieve_others(reaction.message) + [reaction.message]
-	return await asyncio.gather(*[message.edit(view=view) for message in messages])
+	messages_to_edit = associations.retrieve_others(original_message)
+	return await asyncio.gather(*[message.edit(view=view) for message in messages_to_edit])
+
+@client.event
+async def on_reaction_remove(reaction: discord.Reaction, member: Union[discord.Member, discord.User]):
+
+	# omg code repetition !!!! so cool !!!!!!!
+
+	if reaction.message.channel not in [channel for group in mishnet_channels for channel in group]:
+		return
+	
+	partial_message = reaction.message.channel.get_partial_message(reaction.message.id) # converts to partial message
+	original_message = await associations.to_original(partial_message).fetch()
+
+	if original_message.author.id == client.user.id and reaction.message.content.startswith(poll_start):
+
+		# parse existing message back into a dictionary
+		# this ensures reacts stay in the same order
+		poll_reactions = {i.split()[0] : int(i.split()[1]) for i in re.sub(f"{poll_start}.*(?:\n)?" , "" , reaction.message.content).split(' - ') if i != ''} # lol
+
+		# react has to already be there to have been removed
+		old_count = poll_reactions[reaction.emoji]
+		poll_reactions[reaction.emoji] = old_count - 1
+
+		poll_text = re.search(f"{poll_start}(.*)(?:\n)?" , reaction.message.content).group(1)
+
+		to_edit = poll_start + poll_text + '\n' + ' - '.join([f"{emoji} {count}" for emoji , count in poll_reactions.items() if count > 0])
+		return await original_message.edit(content=to_edit)
 
 @client.event
 async def on_message_edit(before , after):
