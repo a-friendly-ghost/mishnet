@@ -14,7 +14,7 @@ client = discord.Client(intents=discord.Intents.all())
 associations = MessageAssociations()
 prefix = 'mn!'
 poll_start = 'poll:'
-poll_queue = [] # [message , emoji , add]
+poll_lock = asyncio.Lock()
 
 mishnet_channels = None
 
@@ -403,12 +403,55 @@ class SuperCoolReactionView(discord.ui.View):
 		for emoji, count in reaction_counts.items():
 			self.add_item(discord.ui.Button(label=count, emoji=emoji, disabled=True))
 
-async def manage_polls():
-	# the thing we're discussing whether we should do or not
-	pass
+async def alter_poll(original_message: discord.Message , reaction: discord.Reaction , count: int):
+
+	global poll_lock
+	await poll_lock.acquire()
+
+	# need to re-get the message (cannot use reaction.message) because the content can change between the call and acquiring the lock
+	# need to check original message specifically because the lock waits for the original to be edited, but not for the duplicates to be edited
+	reaction_message = await original_message.channel.fetch_message(original_message.id)
+
+	# parse existing message back into a dictionary
+	# this ensures reacts stay in the same order
+	poll_reactions = {i.split()[0] : int(i.split()[1]) for i in re.sub(f"{poll_start}.*(?:\n)?" , "" , reaction_message.content).split(' - ') if i != ''} # lol
+
+	if isinstance(reaction.emoji , discord.Emoji): # class for custom emotes
+		emote = f"<:{reaction.emoji.name}:{reaction.emoji.id}>"
+	else:
+		emote = reaction.emoji
+	
+	if emote in poll_reactions.keys():
+		poll_reactions[emote] += count
+	else:
+		poll_reactions[emote] = 1 
+
+	poll_text = re.search(f"{poll_start}(.*)(?:\n)?" , reaction_message.content).group(1)
+
+	to_edit = poll_start + poll_text + '\n' + ' - '.join([f"{emote} {count}" for emote , count in poll_reactions.items() if count > 0])
+	await original_message.edit(content=to_edit)
+	poll_lock.release()
+	return # idk why this is here instead of above
+
+async def update_reactions(message: discord.Message):
+	all_messages = await asyncio.gather(*[partial.fetch() for partial in associations.get_duplicates_of(message)]) + [message]
+	all_reactions = {}
+	for message in all_messages:
+		for react in message.reactions:
+			if react.emoji in all_reactions.keys():
+				old_count = all_reactions[react.emoji]
+				all_reactions[react.emoji] = old_count + react.count
+			else:
+				all_reactions[react.emoji] = react.count 
+
+	view = SuperCoolReactionView(all_reactions)
+	messages_to_edit = associations.retrieve_others(message)
+	return await asyncio.gather(*[message.edit(view=view) for message in messages_to_edit])
 
 @client.event
 async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Member, discord.User]):
+
+	global poll_lock
 
 	if reaction.message.channel not in [channel for group in mishnet_channels for channel in group]:
 		return
@@ -417,20 +460,8 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 	original_message = await associations.to_original(partial_message).fetch()
 
 	if original_message.author.id == client.user.id and reaction.message.content.startswith(poll_start):
-
-		# parse existing message back into a dictionary
-		# this ensures reacts stay in the same order
-		poll_reactions = {i.split()[0] : int(i.split()[1]) for i in re.sub(f"{poll_start}.*(?:\n)?" , "" , reaction.message.content).split(' - ') if i != ''} # lol
-
-		if reaction.emoji in poll_reactions.keys():
-			poll_reactions[reaction.emoji] += 1
-		else:
-			poll_reactions[reaction.emoji] = 1 
-
-		poll_text = re.search(f"{poll_start}(.*)(?:\n)?" , reaction.message.content).group(1)
-
-		to_edit = poll_start + poll_text + '\n' + ' - '.join([f"{emoji} {count}" for emoji , count in poll_reactions.items() if count > 0])
-		return await original_message.edit(content=to_edit)
+		await alter_poll(original_message , reaction , 1)
+		return
 
 	if reaction.emoji == "❌":
 
@@ -463,25 +494,12 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 		duplicates = [i for i in messages if i.channel != reaction.message.channel]
 		associations.set_duplicates(main, duplicates)
 
-	all_messages = await asyncio.gather(*[partial.fetch() for partial in associations.get_duplicates_of(original_message)]) + [original_message]
-	all_reactions = {}
-	# TODO this totaling code is repeated, write a function / class ?
-	for message in all_messages:
-		for react in message.reactions:
-			if react.emoji in all_reactions.keys():
-				old_count = all_reactions[react.emoji]
-				all_reactions[react.emoji] = old_count + react.count
-			else:
-				all_reactions[react.emoji] = react.count 
-
-	view = SuperCoolReactionView(all_reactions)
-	messages_to_edit = associations.retrieve_others(original_message)
-	return await asyncio.gather(*[message.edit(view=view) for message in messages_to_edit])
+	return await update_reactions(original_message)
 
 @client.event
 async def on_reaction_remove(reaction: discord.Reaction, member: Union[discord.Member, discord.User]):
 
-	# omg code repetition !!!! so cool !!!!!!!
+	global poll_lock
 
 	if reaction.message.channel not in [channel for group in mishnet_channels for channel in group]:
 		return
@@ -490,19 +508,10 @@ async def on_reaction_remove(reaction: discord.Reaction, member: Union[discord.M
 	original_message = await associations.to_original(partial_message).fetch()
 
 	if original_message.author.id == client.user.id and reaction.message.content.startswith(poll_start):
-
-		# parse existing message back into a dictionary
-		# this ensures reacts stay in the same order
-		poll_reactions = {i.split()[0] : int(i.split()[1]) for i in re.sub(f"{poll_start}.*(?:\n)?" , "" , reaction.message.content).split(' - ') if i != ''} # lol
-
-		# react has to already be there to have been removed
-		old_count = poll_reactions[reaction.emoji]
-		poll_reactions[reaction.emoji] = old_count - 1
-
-		poll_text = re.search(f"{poll_start}(.*)(?:\n)?" , reaction.message.content).group(1)
-
-		to_edit = poll_start + poll_text + '\n' + ' - '.join([f"{emoji} {count}" for emoji , count in poll_reactions.items() if count > 0])
-		return await original_message.edit(content=to_edit)
+		await alter_poll(original_message , reaction , -1)
+		return
+		
+	return await update_reactions(original_message)
 
 @client.event
 async def on_message_edit(before , after):
