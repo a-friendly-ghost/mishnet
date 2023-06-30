@@ -54,7 +54,7 @@ async def on_ready():
 	prolangs = client.get_channel(988876878582546472)
 	meriakcottage = client.get_channel(1046824467055263824)
 	digiserver = client.get_channel(1070736308806373457)
-	merrycord = client.get_channel(1085661170637226124)
+	merrycord = client.get_channel(1124169206427045979)
 	ostracod = client.get_channel(1093661502084493422)
 	osscord = client.get_channel(1099099975369101385)
 	conserver = client.get_channel(1114983071083667657)
@@ -69,7 +69,7 @@ async def on_ready():
 	prolangs2 = client.get_channel(1006660045511086080)
 	meriakcottage2 = client.get_channel(964755175770325002)
 	digiserver2 = client.get_channel(1070736404155478137)
-	merrycord2 = client.get_channel(1085661144573816842)
+	merrycord2 = client.get_channel(1124169171568164986)
 	ostracod2 = client.get_channel(1093661477111611443)
 	osscord2 = client.get_channel(1099099944054444067)
 	conserver2 = client.get_channel(1114983094630490133)
@@ -209,6 +209,8 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, repl
 	to_send = re.sub(r"https://discord(?:app)?.com/channels/(\d+)/(\d+)/(\d+)", lambda x : next((copy.jump_url for copy in associations.retrieve_others( discord.PartialMessage(channel=client.get_channel(int(x.group(2))) , id=int(x.group(3))) ) if copy.channel.id == target_channel.id),"link not found"), to_send)
 	# future mish here: i am crying about it actually thanks
 	# future future mish here (multiple months later): what the actual fuck what was wrong with you (me)
+
+	
 	
 	if 'mishdebug' in to_send:
 		to_send = '```' + repr(to_send.replace('```','')) + '```'
