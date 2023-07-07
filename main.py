@@ -210,7 +210,17 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, repl
 	# future mish here: i am crying about it actually thanks
 	# future future mish here (multiple months later): what the actual fuck what was wrong with you (me)
 
-	
+	channel_links = re.findall(r"(?!<#)\d+(?=>)" , to_send)
+	for match in channel_links:
+		linked_channel = await client.fetch_channel(match)
+		if linked_channel.guild != target_channel.guild: # avoids redundant replacing link with itself
+			group = next((i for i in mishnet_channels if linked_channel in i), None)
+			if group: # im silly
+				equivalent_channel = next(channel for channel in group if channel.guild.id == target_channel.guild.id)
+				to_send = to_send.replace(f"<#{match}>" , f"<#{equivalent_channel.id}>")
+			else:
+				# linked channel is not a mishnet channel
+				to_send = to_send.replace(f"<#{match}>" , f"`#{linked_channel.name} in {linked_channel.guild.name}`") # replace with mishnet name for server once channels are endatabased
 	
 	if 'mishdebug' in to_send:
 		to_send = '```' + repr(to_send.replace('```','')) + '```'
