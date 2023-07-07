@@ -45,20 +45,20 @@ please remember that given the wide range of mishnet, not all members may be fam
 
 serverdescs = """
 this is a list of every connected server along with a brief description of them
-mishserver - my (mish) personal friend server
-agonyserver - another friend server i am in
-conphon - the server for the r/conlangphonologies subreddit, though moreso its own community with little actual link to the subreddit at all
-ccj - the server for the r/conlangcirclejerk subreddit, though moreso its own community with little actual link to the subreddit at all
-hallowspeak - the server for my conlanging project Hallowspeak
-prolangs - the server for elemenopi's webcomic Prolangs, about humanised versions of popular conlangs
-meriakcottage - idk
-digiserver - one of the oldest conlang servers on discord, created as smaller and chiller alternative to the r/conlangs discord server
-merrycord - merrybot (also known as evie)'s personal friend server
-ostracod - the server about the conlangs and other projects made by ostracod, creator of vötgil among others
-osscord - oss's personal friend server
-conserver - conlanging server created by console
-marciland - server, created by marci, of one of the main friend groups across mishnet
-kathycord - i really don't know man. made by katherine
+- mishserver - my (mish) personal friend server
+- agonyserver - another friend server i am in
+- conphon - the server for the r/conlangphonologies subreddit, though moreso its own community with little actual link to the subreddit at all
+- ccj - the server for the r/conlangcirclejerk subreddit, though moreso its own community with little actual link to the subreddit at all
+- hallowspeak - the server for my conlanging project Hallowspeak
+- prolangs - the server for elemenopi's webcomic Prolangs, about humanised versions of popular conlangs
+- meriakcottage - idk
+- digiserver - one of the oldest conlang servers on discord, created as smaller and chiller alternative to the r/conlangs discord server
+- merrycord - merrybot (also known as evie)'s personal friend server
+- ostracod - the server about the conlangs and other projects made by ostracod, creator of vötgil among others
+- osscord - oss's personal friend server
+- conserver - conlanging server created by console
+- marciland - server, created by marci, of one of the main friend groups across mishnet
+- kathycord - i really don't know man. made by katherine
 """
 
 mishnet_channels = None
@@ -231,6 +231,13 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, repl
 
 		link_url = replied_message.jump_url
 		reply_text = replied_message.content
+		
+		if reply_text.replace('\n','') == commands.replace('\n',''): # reasons
+			reply_text = '`mishnet command list'
+		if reply_text.replace('\n','') == rules.replace('\n',''):
+			reply_text = '`mishnet rules`'
+		if reply_text.replace('\n','') == serverdescs.replace('\n',''):
+			reply_text = '`mishnet server descriptions`'
 		
 		reply_text = re.sub(r"(?<!\]\()(?<!<)(https?:\/\/[^ \n]+)" , r"<\1>" , reply_text) # unembeds a link inside the quote block -- thank u taswelll for the help!
 		# future mish: thank you taswelll for fixing your own code when it broke!
