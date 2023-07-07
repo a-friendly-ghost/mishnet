@@ -13,8 +13,53 @@ load_dotenv()
 client = discord.Client(intents=discord.Intents.all())
 associations = MessageAssociations()
 prefix = 'mn!'
+
 poll_start = 'poll:'
 poll_lock = asyncio.Lock()
+
+commands = f"""
+__mishnet commands:__
+- {prefix}help - sends this message (alias: {prefix}info)
+- {prefix}perftest - tests bridge performance time
+- {prefix}nick [nick here] - changes your mishnet nickname (alias: {prefix}nickname)
+- {prefix}nick - tells you how other servers see your name (aliases: {prefix}nicktest , {prefix}nickname)
+- {prefix}clearnick - resets your mishnet nickname to use your username
+- {prefix}poll [optional text] - creates a poll message
+- {prefix}rules - sends the rules of mishnet
+- {prefix}servers - sends a description of each server connected to mishnet
+the []s aren't part of the command
+__reaction functions:__
+- :x: - deletes a bridged message
+- :bell: - pings the person reacted to
+"""
+
+rules = """
+the mishnet rules are a combination of the rules of mishnet's connected servers, alongside what i (mish) consider to be right and wrong
+- no bigotry of any kind, such as on the basis of race, nationality, religion, gender, sexual orientation, ability, etc
+- respect your fellow mishnet users, including their wishes regarding not seeing particular things, words, or topics
+- no explicit or shocking images or videos
+if you see someone breaking these rules or doing something you consider wrong, please ping me personally. if i am not online, ping one of the mods of the server you are in
+breaking a rule will result in recieving a warn; three warns will result in being banned from mishnet
+please remember that given the wide range of mishnet, not all members may be familiar with what makes you uncomfortable, even if it seems obvious from your perspective
+"""
+
+serverdescs = """
+this is a list of every connected server along with a brief description of them
+mishserver - my (mish) personal friend server
+agonyserver - another friend server i am in
+conphon - the server for the r/conlangphonologies subreddit, though moreso its own community with little actual link to the subreddit at all
+ccj - the server for the r/conlangcirclejerk subreddit, though moreso its own community with little actual link to the subreddit at all
+hallowspeak - the server for my conlanging project Hallowspeak
+prolangs - the server for elemenopi's webcomic Prolangs, about humanised versions of popular conlangs
+meriakcottage - idk
+digiserver - one of the oldest conlang servers on discord, created as smaller and chiller alternative to the r/conlangs discord server
+merrycord - merrybot (also known as evie)'s personal friend server
+ostracod - the server about the conlangs and other projects made by ostracod, creator of vötgil among others
+osscord - oss's personal friend server
+conserver - conlanging server created by console
+marciland - server, created by marci, of one of the main friend groups across mishnet
+kathycord - i really don't know man. made by katherine
+"""
 
 mishnet_channels = None
 
@@ -231,15 +276,15 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, repl
 	return to_send
 
 async def bridge(
-		content, 
-		target_channel: discord.TextChannel, 
-		replied_message, 
-		name: str, 
-		pfp: discord.Asset, 
-		attachments: list[discord.Attachment],
-		stickers,
-		ping: bool, 
-		):
+	content, 
+	target_channel: discord.TextChannel, 
+	replied_message, 
+	name: str, 
+	pfp: discord.Asset, 
+	attachments: list[discord.Attachment],
+	stickers,
+	ping: bool
+):
 	
 	webhook = webhooks[target_channel]
 
@@ -275,19 +320,7 @@ async def on_message(message: discord.Message):
 	# commands
 
 	if message.content.startswith(prefix+'help') or message.content.startswith(prefix+'info'):
-		await message.channel.send(f"""
-		__mishnet commands:__
-		{prefix}help - sends this message (alias: {prefix}info)
-		{prefix}perftest - tests bridge performance time
-		{prefix}nick [nick here] - changes your mishnet nickname (alias: {prefix}nickname)
-		{prefix}nick - tells you how other servers see your name (aliases: {prefix}nicktest , {prefix}nickname)
-		{prefix}clearnick - resets your mishnet nickname to use your username
-		{prefix}poll [optional text]- creates a poll message
-		the []s aren't part of the command
-		__reaction functions:__
-		:x: - deletes a bridged message
-		:bell: - pings the person reacted to
-		""")
+		await message.channel.send(commands)
 	
 	if message.content == prefix + "uwu": #vitally important command
 		await message.channel.send('uwu')
@@ -327,6 +360,12 @@ async def on_message(message: discord.Message):
 
 	if message.content.startswith(prefix + 'poll'):
 		await message.channel.send(poll_start + message.content.replace(prefix+'poll',''))
+
+	if message.content == prefix + 'rules':
+		await message.channel.send(rules)
+
+	if message.content == prefix + 'servers':
+		await message.channel.send(serverdescs)
 
 	# bridge
 
