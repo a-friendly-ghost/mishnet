@@ -262,7 +262,7 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, repl
 	# future mish here: i am crying about it actually thanks
 	# future future mish here (multiple months later): what the actual fuck what was wrong with you (me)
 
-	channel_links = re.findall(r"(?!<#)\d+(?=>)" , to_send)
+	channel_links = re.findall(r"(?<=<#)\d+(?=>)" , to_send)
 	for match in channel_links:
 		linked_channel = await client.fetch_channel(match)
 		if linked_channel.guild != target_channel.guild: # avoids redundant replacing link with itself
