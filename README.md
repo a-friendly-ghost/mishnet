@@ -26,6 +26,7 @@ finished and working!:
 - stickers bridging
 - cross server pinging
 - polls
+- channel name translation
 
 *to messages sent after the last bot restart
 
