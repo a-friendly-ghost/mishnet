@@ -218,7 +218,7 @@ def prune_replies(content: str, length_limit: int) -> str:
 	
 	return '\n'.join([i[0] for i in lines_depths])
 
-async def create_to_send(content: str, target_channel: discord.TextChannel, replied_message, stickers) -> str:
+async def create_to_send(content: str, target_channel: discord.TextChannel, original_guild: discord.Guild, replied_message, stickers) -> str:
 	# i know this is not the most compact way to write this function, but it's the cleanest and nicest imo. optimise it if you want
 	to_send = ''
 	
@@ -273,6 +273,12 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, repl
 			else:
 				# linked channel is not a mishnet channel
 				to_send = to_send.replace(f"<#{match}>" , f"`#{linked_channel.name} in {linked_channel.guild.name}`") # replace with mishnet name for server once channels are endatabased
+
+	role_pings = re.findall(r"(?<=<@&)\d+(?=>)" , to_send)
+	for match in role_pings:
+		pinged_role = original_guild.get_role(match)
+		to_send = to_send.replace(f"<@&{match}>" , f"`@{pinged_role.name} role in {original_guild}`")
+
 	
 	if 'mishdebug' in to_send:
 		to_send = '```' + repr(to_send.replace('```','')) + '```'
@@ -285,6 +291,7 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, repl
 async def bridge(
 	content, 
 	target_channel: discord.TextChannel, 
+	original_guild: discord.Guild,
 	replied_message, 
 	name: str, 
 	pfp: discord.Asset, 
@@ -295,7 +302,7 @@ async def bridge(
 	
 	webhook = webhooks[target_channel]
 
-	to_send = await create_to_send(content, target_channel, replied_message, stickers)
+	to_send = await create_to_send(content, target_channel, original_guild, replied_message, stickers)
 	attachments_to_files = await asyncio.gather(*[attachment.to_file(spoiler=attachment.is_spoiler()) for attachment in attachments])
 
 	copy_message = await webhook.send(
@@ -399,6 +406,7 @@ async def on_message(message: discord.Message):
 	duplicate_messages = await asyncio.gather(*[bridge(
 			content = message.content,
 			target_channel = channel,
+			original_guild = message.channel.guild
 			replied_message = replied_message,
 			name = name,
 			pfp = pfp,
@@ -539,6 +547,7 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 		messages = await asyncio.gather(*[bridge(
 				content = original_message.author.mention, 
 				target_channel = channel, 
+				original_guild = original_message.channel.guild,
 				replied_message = original_message,
 				name = name, 
 				pfp = pfp, 
