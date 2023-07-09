@@ -406,7 +406,7 @@ async def on_message(message: discord.Message):
 	duplicate_messages = await asyncio.gather(*[bridge(
 			content = message.content,
 			target_channel = channel,
-			original_guild = message.channel.guild
+			original_guild = message.channel.guild,
 			replied_message = replied_message,
 			name = name,
 			pfp = pfp,
