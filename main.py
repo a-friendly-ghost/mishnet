@@ -276,7 +276,7 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 
 	role_pings = re.findall(r"(?<=<@&)\d+(?=>)" , to_send)
 	for match in role_pings:
-		pinged_role = original_guild.get_role(match)
+		pinged_role = next(i for i in original_guild.roles if i.id == int(match))
 		to_send = to_send.replace(f"<@&{match}>" , f"`@{pinged_role.name} role in {original_guild}`")
 
 	
@@ -606,7 +606,7 @@ async def on_message_edit(before , after):
 		while wait_time < 5:
 			try:
 				webhook = webhooks[partial_to_edit.channel]
-				toEdit = await create_to_send(after_message.content , partial_to_edit.channel, replied_message, after.stickers)
+				toEdit = await create_to_send(after_message.content , partial_to_edit.channel, after_message.guild, replied_message, after.stickers)
 				return await webhook.edit_message(partial_to_edit.id, content=toEdit)
 			except:
 				exception_type, exception, exc_traceback = sys.exc_info()
