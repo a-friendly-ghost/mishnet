@@ -276,7 +276,11 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 
 	role_pings = re.findall(r"(?<=<@&)\d+(?=>)" , to_send)
 	for match in role_pings:
-		pinged_role = next(i for i in original_guild.roles if i.id == int(match))
+		try:
+			pinged_role = next(i for i in original_guild.roles if i.id == int(match))
+		except StopIteration:
+			await original_guild.send('dude are you trying to send a role from a different server. why would you ever need to do that. are you trying to break me on purpose. thats not nice dude.')
+			break
 		to_send = to_send.replace(f"<@&{match}>" , f"`@{pinged_role.name} role in {original_guild}`")
 
 	
