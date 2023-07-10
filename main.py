@@ -279,7 +279,8 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 		try:
 			pinged_role = next(i for i in original_guild.roles if i.id == int(match))
 		except StopIteration:
-			await next(i for i in original_guild.channels if i in mishnet1 or i in mishnet2).send('dude are you trying to send a role from a different server. why would you ever need to do that. are you trying to break me on purpose. thats not nice dude.')
+			original_channel = next(i for i in original_guild.channels if i in mishnet1 or i in mishnet2)
+			await original_channel.send('dude are you trying to send a role from a different server. why would you ever need to do that. are you trying to break me on purpose. thats not nice dude.')
 			break
 		to_send = to_send.replace(f"<@&{match}>" , f"`@{pinged_role.name} role in {original_guild}`")
 
