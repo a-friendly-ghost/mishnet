@@ -242,10 +242,11 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 		reply_text = re.sub(r"(?<!\]\()(?<!<)(https?:\/\/[^ \n]+)" , r"<\1>" , reply_text) # unembeds a link inside the quote block -- thank u taswelll for the help!
 		# future mish: thank you taswelll for fixing your own code when it broke!
 
-		reply_text += ' ' + ' '.join([f"[(🖼️)](<{attachment.url}>)" for attachment in replied_message.attachments])
+		reply_text += ' ' + ' '.join([f"[(📎)](<{attachment.url}>)" for attachment in replied_message.attachments]) # the image emoji didn't render on ios
 
 		# me on my way to modify code to make it less compact
 		repliee_name = await get_mishnick_or_username(conn, replied_message.author)
+		repliee_name = repliee_name.replace('_','\_').replace('*','\*') # avoids usernames with _s and *s showing up as markdown formatting
 		to_send += f'> **{re.sub(r", from .*" , "" , repliee_name)}** [{link_text}]({link_url})' # removes server from user's name
 		to_send += ''.join([ ('\n> '+line) for line in reply_text.split('\n') ])
 		to_send += '\n'
@@ -278,7 +279,6 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 	for match in role_pings:
 		pinged_role = next(i for i in original_guild.roles if i.id == int(match))
 		to_send = to_send.replace(f"<@&{match}>" , f"`@{pinged_role.name} role in {original_guild}`")
-
 	
 	if 'mishdebug' in to_send:
 		to_send = '```' + repr(to_send.replace('```','')) + '```'
