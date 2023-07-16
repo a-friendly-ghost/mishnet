@@ -178,6 +178,8 @@ async def on_ready():
 	murtz = 389291792471687178
 	banlist = [kafka, mimubot, dmitrij, echo, yuphph, murtz]
 
+	print('banlist stored')
+
 	global ready
 	ready = True
 	print('on ready end')
@@ -384,6 +386,9 @@ async def on_message(message: discord.Message):
 
 	# bridge
 
+	if message.content == prefix + "perftest": 
+		startTime = time.perf_counter()
+
 	mishnet_channel = next( (channel_group for channel_group in mishnet_channels if message.channel in channel_group) , None ) # feeling like this would be another application for the associations data structure, but we made it only work for storing messages
 	if not mishnet_channel:
 		return	
@@ -393,9 +398,6 @@ async def on_message(message: discord.Message):
 			return await message.delete()
 		except:
 			return message.channel.send('error: mishnet does not have message deletion perms in this server, and so it cannot stop banned users')
-
-	if message.content == prefix + "perftest": 
-		startTime = time.perf_counter()
 	
 	target_channels = [i for i in mishnet_channel if i.guild != message.channel.guild]
 
