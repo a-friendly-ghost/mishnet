@@ -82,36 +82,15 @@ async def get_webhook_for_channel(channel: discord.TextChannel):
 	print(f"Making webhook for {channel.name}...")
 	return await channel.create_webhook(name="mishnet webhook", reason="what are you a cop?")
 
-permamessages = {}
-
 async def manage_typing_indicator():
-	global users_typing
-	global permamessages
-
-	# get currently typingindicated users
+	# TODO: async this
 	for group in mishnet_channels:
 		for channel in group:
-			
-			all_typing_users = [await get_mishnick_or_username(conn , user) for node , userlist in users_typing.items() if node != channel and node in group for user in userlist] # i do not comprehend this comprehension
-			text = f"{', '.join(all_typing_users)} {'is' if len(all_typing_users) < 2 else 'are'} typing"
-			
-			perma = permamessages[channel]
-			
-			if perma != None:
-				if all_typing_users:
-					if text != perma.content:
-						await perma.edit(content=text)
-				else:
-					permamessages[channel] = None
-					await perma.delete()
-
-			else:
-				if all_typing_users:
-					new = await channel.send(text)
-
-					permamessages[channel] = new
-				else:
-					pass
+			show_typing = True if len([user for node , userlist in users_typing.items() if node != channel and node in group for user in userlist]) > 0 else False
+			if show_typing:
+				async with channel.typing():
+					await asyncio.sleep(1)
+	return
 
 @client.event
 async def on_ready():
@@ -219,13 +198,6 @@ async def on_ready():
 			users_typing[node] = []
 
 	print('typing dict initialised')
-
-	global permamessages
-	for mishnet_channel in mishnet_channels:
-		for node in mishnet_channel:
-			permamessages[node] = None
-
-	print('permamessages sent')
 
 	global ready
 	ready = True
@@ -425,7 +397,6 @@ async def on_message(message: discord.Message):
 	# bridge
 
 	global users_typing
-	global permamessages
 
 	if message.content == prefix + "perftest": 
 		startTime = time.perf_counter()
@@ -434,17 +405,10 @@ async def on_message(message: discord.Message):
 	if not mishnet_channel:
 		return
 
-	if message.author.id == client.user.id and ("typing" in message.content): return
-
 	# typing indicator runs out immediately when message is sent
 
 	if message.author in users_typing[message.channel]:
 		users_typing[message.channel].remove(message.author)
-
-	node_perma = permamessages[message.channel]
-	if node_perma:
-		permamessages[message.channel] = None
-		await node_perma.delete()
 
 	await manage_typing_indicator()
 
