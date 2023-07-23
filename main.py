@@ -92,7 +92,7 @@ async def manage_typing_indicator():
 	for group in mishnet_channels:
 		for channel in group:
 			
-			all_typing_users = [await get_mishnick_or_username(user) for node , userlist in users_typing.items() if node != channel and node in group for user in userlist] # i do not comprehend this comprehension
+			all_typing_users = [await get_mishnick_or_username(conn , user) for node , userlist in users_typing.items() if node != channel and node in group for user in userlist] # i do not comprehend this comprehension
 			text = f"{', '.join(all_typing_users)} {'is' if len(all_typing_users) < 2 else 'are'} typing"
 			
 			perma = permamessages[channel]
