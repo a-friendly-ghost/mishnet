@@ -344,6 +344,15 @@ async def on_message(message: discord.Message):
 	while ready == False:
 		await asyncio.sleep(0.1)
 
+	# ensure not bridging bridged messages themselves or responding to bridged commands
+	if message.webhook_id: # avoids unnecessarily checking all this
+		channelWebhooks = await message.channel.webhooks()
+		for webhook in channelWebhooks:
+			if webhook.id == message.webhook_id:
+				if webhook.token:
+					# this webhook is from mishnet
+					return
+
 	# commands
 
 	if message.content.startswith(prefix+'help') or message.content.startswith(prefix+'info'):
@@ -411,15 +420,6 @@ async def on_message(message: discord.Message):
 		users_typing[message.channel].remove(message.author)
 
 	await manage_typing_indicator()
-
-	# ensure not bridging bridged messages themselves or responding to bridged commands
-	if message.webhook_id: # avoids unnecessarily checking all this
-		channelWebhooks = await message.channel.webhooks()
-		for webhook in channelWebhooks:
-			if webhook.id == message.webhook_id:
-				if webhook.token:
-					# this webhook is from mishnet
-					return
 
 	if message.author.id in banlist:
 		try:
