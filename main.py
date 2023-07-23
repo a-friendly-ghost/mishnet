@@ -1,4 +1,4 @@
-import discord, io, os, random, sys, time, asyncio, re
+import discord, io, os, random, sys, time, asyncio, re, datetime
 from dotenv import load_dotenv
 from imstupid import MessageAssociations, TheOriginalMessageHasAlreadyBeenDeletedYouSlowIdiotError, get_mishnick_or_username
 from typing import Union
@@ -56,8 +56,8 @@ this is a list of every connected server along with a brief description of them
 - merrycord - merrybot (also known as evie)'s personal friend server
 - ostracod - the server about the conlangs and other projects made by ostracod, creator of vötgil among others
 - osscord - oss's personal friend server
-- conserver - conlanging server created by console
-- marciland - server, created by marci, of one of the main friend groups across mishnet
+- conserver - public conlanging server created by console
+- marciland - server, created by marci, of one of the main friend groups across mishnet after their individual servers became no longer useable
 - kathycord - i really don't know man. made by katherine
 """
 
@@ -81,6 +81,37 @@ async def get_webhook_for_channel(channel: discord.TextChannel):
 
 	print(f"Making webhook for {channel.name}...")
 	return await channel.create_webhook(name="mishnet webhook", reason="what are you a cop?")
+
+permamessages = {}
+
+async def manage_typing_indicator():
+	global users_typing
+	global permamessages
+
+	# get currently typingindicated users
+	for group in mishnet_channels:
+		for channel in group:
+			
+			all_typing_users = [await get_mishnick_or_username(user) for node , userlist in users_typing.items() if node != channel and node in group for user in userlist] # i do not comprehend this comprehension
+			text = f"{', '.join(all_typing_users)} {'is' if len(all_typing_users) < 2 else 'are'} typing"
+			
+			perma = permamessages[channel]
+			
+			if perma != None:
+				if all_typing_users:
+					if text != perma.content:
+						await perma.edit(content=text)
+				else:
+					permamessages[channel] = None
+					await perma.delete()
+
+			else:
+				if all_typing_users:
+					new = await channel.send(text)
+
+					permamessages[channel] = new
+				else:
+					pass
 
 @client.event
 async def on_ready():
@@ -176,9 +207,25 @@ async def on_ready():
 	echo = 472692106150805505
 	yuphph = 127243394559770624
 	murtz = 389291792471687178
-	banlist = [kafka, mimubot, dmitrij, echo, yuphph, murtz]
+	kaz = 163058416829333504
+	banlist = [kafka, mimubot, dmitrij, echo, yuphph, murtz, kaz]
 
 	print('banlist stored')
+
+	global users_typing
+	users_typing = {}
+	for mishnet_channel in mishnet_channels:
+		for node in mishnet_channel:
+			users_typing[node] = []
+
+	print('typing dict initialised')
+
+	global permamessages
+	for mishnet_channel in mishnet_channels:
+		for node in mishnet_channel:
+			permamessages[node] = None
+
+	print('permamessages sent')
 
 	global ready
 	ready = True
@@ -325,15 +372,6 @@ async def on_message(message: discord.Message):
 	while ready == False:
 		await asyncio.sleep(0.1)
 
-	# ensure not bridging bridged messages themselves or responding to bridged commands
-	if message.webhook_id: # avoids unnecessarily checking all this
-		channelWebhooks = await message.channel.webhooks()
-		for webhook in channelWebhooks:
-			if webhook.id == message.webhook_id:
-				if webhook.token:
-					# this webhook is from mishnet
-					return
-
 	# commands
 
 	if message.content.startswith(prefix+'help') or message.content.startswith(prefix+'info'):
@@ -386,12 +424,38 @@ async def on_message(message: discord.Message):
 
 	# bridge
 
+	global users_typing
+	global permamessages
+
 	if message.content == prefix + "perftest": 
 		startTime = time.perf_counter()
 
 	mishnet_channel = next( (channel_group for channel_group in mishnet_channels if message.channel in channel_group) , None ) # feeling like this would be another application for the associations data structure, but we made it only work for storing messages
 	if not mishnet_channel:
-		return	
+		return
+
+	if message.author.id == client.user.id and ("typing" in message.content): return
+
+	# typing indicator runs out immediately when message is sent
+
+	if message.author in users_typing[message.channel]:
+		users_typing[message.channel].remove(message.author)
+
+	node_perma = permamessages[message.channel]
+	if node_perma:
+		permamessages[message.channel] = None
+		await node_perma.delete()
+
+	await manage_typing_indicator()
+
+	# ensure not bridging bridged messages themselves or responding to bridged commands
+	if message.webhook_id: # avoids unnecessarily checking all this
+		channelWebhooks = await message.channel.webhooks()
+		for webhook in channelWebhooks:
+			if webhook.id == message.webhook_id:
+				if webhook.token:
+					# this webhook is from mishnet
+					return
 
 	if message.author.id in banlist:
 		try:
@@ -598,6 +662,8 @@ async def on_message_edit(before , after):
 				if webhook.token:
 					# this webhook is from mishnet
 					return
+				
+	if before.author.id == client.user.id: return
 
 	assert before.id == after.id
 
@@ -638,8 +704,21 @@ async def on_message_edit(before , after):
 	#todo: fix this code repetition
 	
 	duplicate_messages = await get_duplicates_timeout()
+	if not duplicate_messages: return # edit done before bot started ? idk
 	replied_message = await get_replied_message(after)
 	return await asyncio.gather(*[edit_copy(m , after, replied_message) for m in duplicate_messages])
+
+@client.event
+async def on_typing(channel, user, when):
+	if channel not in [channel for group in mishnet_channels for channel in group]: return
+	
+	global users_typing
+	if user not in users_typing[channel]:
+		users_typing[channel].append(user)
+
+	await asyncio.sleep(10)
+	users_typing[channel].remove(user)
+	return await manage_typing_indicator()
 
 # it goes here. fuck you
 messages = [
