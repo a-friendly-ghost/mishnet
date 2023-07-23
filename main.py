@@ -675,6 +675,7 @@ async def on_message_edit(before , after):
 @client.event
 async def on_typing(channel, user, when):
 	if channel not in [channel for group in mishnet_channels for channel in group]: return
+	if user.id == client.user.id: return
 	
 	global users_typing
 	if user not in users_typing[channel]:
