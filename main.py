@@ -186,8 +186,7 @@ async def on_ready():
 	echo = 472692106150805505
 	yuphph = 127243394559770624
 	murtz = 389291792471687178
-	kaz = 163058416829333504
-	banlist = [kafka, mimubot, dmitrij, echo, yuphph, murtz, kaz]
+	banlist = [kafka, mimubot, dmitrij, echo, yuphph, murtz]
 
 	print('banlist stored')
 
