@@ -304,8 +304,8 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 	if 'mishdebug' in to_send:
 		to_send = '```' + repr(to_send.replace('```','')) + '```'
 
-	if len(to_send) > 2000:
-		to_send = prune_replies(to_send , 2000)
+	if len(to_send) > 1000 and replied_message:
+		to_send = prune_replies(to_send , 1000)
 	
 	return to_send
 
