@@ -625,9 +625,6 @@ async def on_message_edit(before , after):
 				if webhook.token:
 					# this webhook is from mishnet
 					return
-				
-	if before.author.id == client.user.id: return
-
 	assert before.id == after.id
 
 	original_partial_message = before.channel.get_partial_message(before.id) # converts before (discord.Message) into a discord.PartialMessage
