@@ -172,7 +172,7 @@ async def on_ready():
 		osscord2 : 'osscord',
 		conserver2 : 'conserver',
 		marciland2 : 'marciland',
-		kathycord2 : 'kathycord'
+		kathycord2 : 'kathycord',
 		openbook2 : 'open book'
 	}
 
