@@ -59,6 +59,7 @@ this is a list of every connected server along with a brief description of them
 - conserver - public conlanging server created by console
 - marciland - server, created by marci, of one of the main friend groups across mishnet after their individual servers became no longer useable
 - kathycord - i really don't know man. made by katherine
+- open book - a server focused around the idea that conlanging and worldbuilding is an artform like any other, created by creativitytheemotion
 """
 
 mishnet_channels = None
@@ -115,6 +116,7 @@ async def on_ready():
 	conserver = client.get_channel(1114983071083667657)
 	marciland = client.get_channel(1115636041475440750)
 	kathycord = client.get_channel(1118827288641941535)
+	openbook = client.get_channel(1139256333540012082)
 
 	mishserver2 = client.get_channel(1006522289048784967)
 	agonyserver2 = client.get_channel(1006237275664949349)
@@ -130,10 +132,11 @@ async def on_ready():
 	conserver2 = client.get_channel(1114983094630490133)
 	marciland2 = client.get_channel(1115635971216650271)
 	kathycord2 = client.get_channel(1118827217691099226)
+	openbook2 = client.get_channel(1139256312488808488)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  digiserver , merrycord , ostracod , osscord , conserver , marciland , kathycord] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , digiserver2 , merrycord2 , ostracod2 , osscord2 , conserver2 , marciland2 , kathycord2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  digiserver , merrycord , ostracod , osscord , conserver , marciland , kathycord , openbook] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , digiserver2 , merrycord2 , ostracod2 , osscord2 , conserver2 , marciland2 , kathycord2 , openbook2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	print('all channels gotten')
@@ -154,6 +157,7 @@ async def on_ready():
 		conserver : 'conserver',
 		marciland : 'marciland' ,
 		kathycord : 'kathycord',
+		openbook : 'open book',
 
 		mishserver2 : 'mishserver',
 		agonyserver2 : 'agonyserver',
@@ -169,6 +173,7 @@ async def on_ready():
 		conserver2 : 'conserver',
 		marciland2 : 'marciland',
 		kathycord2 : 'kathycord'
+		openbook2 : 'open book'
 	}
 
 	global webhooks
