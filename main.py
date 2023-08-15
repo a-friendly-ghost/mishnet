@@ -384,8 +384,8 @@ async def on_message(message: discord.Message):
 				else:
 					await cursor.execute("INSERT INTO nicknames (user_id, nickname) VALUES (%s, %s)" , [message.author.id,nick])
 
-		await conn.commit()
-		await message.channel.send(f'hello {nick}! i have set your mishnet (me) nickname as `{nick}` c:')
+			await conn.commit()
+			await message.channel.send(f'hello {nick}! i have set your mishnet (me) nickname as `{nick}` c:')
 
 	if message.content.startswith(prefix+"clearnick"):
 		async with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
