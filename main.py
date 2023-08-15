@@ -580,7 +580,7 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 		mishnet_channel = next(group for group in mishnet_channels if original_message.channel in group)
 		
 		messages = await asyncio.gather(*[bridge(
-				content = original_message.author.mention, 
+				content = f"{original_message.author.mention} username: `{original_message.author.name}`", 
 				target_channel = channel, 
 				original_guild = original_message.channel.guild,
 				replied_message = original_message,
