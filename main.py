@@ -112,7 +112,6 @@ async def on_ready():
 	digiserver = client.get_channel(1070736308806373457)
 	merrycord = client.get_channel(1124169206427045979)
 	ostracod = client.get_channel(1093661502084493422)
-	osscord = client.get_channel(1099099975369101385)
 	conserver = client.get_channel(1114983071083667657)
 	marciland = client.get_channel(1115636041475440750)
 	kathycord = client.get_channel(1118827288641941535)
@@ -128,15 +127,14 @@ async def on_ready():
 	digiserver2 = client.get_channel(1070736404155478137)
 	merrycord2 = client.get_channel(1124169171568164986)
 	ostracod2 = client.get_channel(1093661477111611443)
-	osscord2 = client.get_channel(1099099944054444067)
 	conserver2 = client.get_channel(1114983094630490133)
 	marciland2 = client.get_channel(1115635971216650271)
 	kathycord2 = client.get_channel(1118827217691099226)
 	openbook2 = client.get_channel(1139256312488808488)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  digiserver , merrycord , ostracod , osscord , conserver , marciland , kathycord , openbook] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , digiserver2 , merrycord2 , ostracod2 , osscord2 , conserver2 , marciland2 , kathycord2 , openbook2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  digiserver , merrycord , ostracod , conserver , marciland , kathycord , openbook] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , digiserver2 , merrycord2 , ostracod2 , conserver2 , marciland2 , kathycord2 , openbook2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	print('all channels gotten')
@@ -153,7 +151,6 @@ async def on_ready():
 		digiserver : 'digiserver',
 		merrycord : 'merrycord',
 		ostracod : 'ostracod conlangs',
-		osscord : 'osscord',
 		conserver : 'conserver',
 		marciland : 'marciland' ,
 		kathycord : 'kathycord',
@@ -169,7 +166,6 @@ async def on_ready():
 		digiserver2 : 'digiserver',
 		merrycord2 : 'merrycord',
 		ostracod2 : 'ostracod conlangs',
-		osscord2 : 'osscord',
 		conserver2 : 'conserver',
 		marciland2 : 'marciland',
 		kathycord2 : 'kathycord',
