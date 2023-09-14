@@ -27,6 +27,9 @@ __mishnet commands:__
 - {prefix}poll [optional text] - creates a poll message
 - {prefix}rules - sends the rules of mishnet
 - {prefix}servers - sends a description of each server connected to mishnet
+- {prefix}telephone - sends a jump link to the latest telephone game entry
+- {prefix}telephoneprefix - tells you the prefix used to mark telephone messages (alias: {prefix}tpprefix)
+- {prefix}telephoneprefix [prefix here] - sets the telephone prefix. admin required (alias: {prefix}tpprefix)
 the []s aren't part of the command
 __reaction functions:__
 - :x: - deletes a bridged message
@@ -345,6 +348,8 @@ async def bridge(
 @client.event
 async def on_message(message: discord.Message):
 
+	global telephoneprefix
+
 	while ready == False:
 		await asyncio.sleep(0.1)
 
@@ -413,7 +418,6 @@ async def on_message(message: discord.Message):
 			await message.channel.send(f"the current prefix used for the mishnet telephone game is\n{telephoneprefix}")
 		elif message.content.startswith(prefix + 'telephoneprefix ') or message.content.startswith(prefix + 'tpprefix '):
 			if message.author.guild_permissions.administrator:
-				global telephoneprefix
 				telephoneprefix = message.content.replace(prefix + 'telephoneprefix ' , '').replace(prefix + 'tpprefix ' , '')
 				open('telephoneprefix.txt','w').write(telephoneprefix)
 				await message.channel.send(f'telephone prefix set to {telephoneprefix}')
