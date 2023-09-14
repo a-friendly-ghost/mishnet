@@ -425,7 +425,7 @@ async def on_message(message: discord.Message):
 				await message.channel.send('you do not have perms to do this')
 
 	if message.content == prefix + 'telephone':
-		return message.channel.send(f'the latest telephone message is {latesttelephone}')
+		await message.channel.send(f'the latest telephone message is {latesttelephone}')
 	
 	if message.content.startswith(telephoneprefix):
 		latesttelephone = message.jump_url
