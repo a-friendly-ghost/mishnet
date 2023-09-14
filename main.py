@@ -348,7 +348,7 @@ async def bridge(
 @client.event
 async def on_message(message: discord.Message):
 
-	global telephoneprefix
+	global telephoneprefix, latesttelephone
 
 	while ready == False:
 		await asyncio.sleep(0.1)
