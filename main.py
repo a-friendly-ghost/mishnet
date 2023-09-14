@@ -74,6 +74,9 @@ if sys.platform == 'win32':
 
 ready = False
 
+telephoneprefix = open('telephoneprefix.txt','r').read()
+latesttelephone = open('telephonelatest.txt','r').read()
+
 async def get_webhook_for_channel(channel: discord.TextChannel):
 	# webhooks that we own have a non-None token attribute
 	for webhook in await channel.webhooks():
@@ -362,13 +365,13 @@ async def on_message(message: discord.Message):
 	if message.content == prefix + "uwu": #vitally important command
 		await message.channel.send('uwu')
 
-	# oh my god please write a separate function for aliases
+	# TODO: oh my god please write a separate function for aliases
 	if message.content == prefix+"nick" or message.content == prefix+"nickname" or message.content == prefix+"nicktest": # nick(test) command
 		other_server_name = await get_mishnick_or_username(conn, message.author)
 		await message.channel.send(f"hi!!! your name is currently seen by people on other servers as {other_server_name} ! :D")
 
 	elif message.content.startswith(prefix+"nick") or message.content.startswith(prefix+"nickname"): # nick(change) command
-		nick = message.content.replace(prefix+"nick ",'').replace(prefix+"nickname",'') # this is a bad (ugly) way to do this i think i should write a function
+		nick = message.content.replace(prefix+"nick ",'').replace(prefix+"nickname",'') # TODO: this is a bad (ugly) way to do this i think i should write a function
 
 		if len(nick) > 32:
 			await message.channel.send('sorry, a mishnet nickname can only be a maximum of 32 characters long')
@@ -403,6 +406,26 @@ async def on_message(message: discord.Message):
 
 	if message.content == prefix + 'servers':
 		await message.channel.send(serverdescs)
+
+	# this is bad code. why would you write it in this way
+	if message.content.startswith(prefix + 'telephoneprefix') or message.content.startswith(prefix + 'tpprefix'):
+		if message.content.replace(prefix + 'telephoneprefix' , '').replace(prefix + 'tpprefix' , '') == '':
+			await message.channel.send(f"the current prefix used for the mishnet telephone game is\n{telephoneprefix}")
+		elif message.content.startswith(prefix + 'telephoneprefix ') or message.content.startswith(prefix + 'tpprefix '):
+			if message.author.guild_permissions.administrator:
+				global telephoneprefix
+				telephoneprefix = message.content.replace(prefix + 'telephoneprefix ' , '').replace(prefix + 'tpprefix ' , '')
+				open('telephoneprefix.txt','w').write(telephoneprefix)
+				await message.channel.send(f'telephone prefix set to {telephoneprefix}')
+			else:
+				await message.channel.send('you do not have perms to do this')
+
+	if message.content == prefix + 'telephone':
+		return message.channel.send(f'the latest telephone message is {latesttelephone}')
+	
+	if message.content.startswith(telephoneprefix):
+		latesttelephone = message.jump_url
+		open('telephonelatest.txt','w').write(latesttelephone)
 
 	# bridge
 
