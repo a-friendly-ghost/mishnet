@@ -425,7 +425,8 @@ async def on_message(message: discord.Message):
 				await message.channel.send('you do not have perms to do this')
 
 	if message.content == prefix + 'telephone':
-		await message.channel.send(f'the latest telephone message is {latesttelephone}')
+		to_send = re.sub(r"https://discord(?:app)?.com/channels/(\d+)/(\d+)/(\d+)", lambda x : next((copy.jump_url for copy in associations.retrieve_others( discord.PartialMessage(channel=client.get_channel(int(x.group(2))) , id=int(x.group(3))) ) if copy.channel.id == message.channel.id),"link not found"), latesttelephone)
+		await message.channel.send(f'the latest telephone message is {to_send}')
 	
 	if message.content.startswith(telephoneprefix):
 		latesttelephone = message.jump_url
