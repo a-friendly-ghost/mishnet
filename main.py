@@ -79,6 +79,7 @@ ready = False
 
 telephoneprefix = open('telephoneprefix.txt','r').read()
 latesttelephone = open('telephonelatest.txt','r').read()
+banlist = [int(i) for i in open('banlist.txt','r').readlines()]
 
 async def get_webhook_for_channel(channel: discord.TextChannel):
 	# webhooks that we own have a non-None token attribute
@@ -185,16 +186,6 @@ async def on_ready():
 			webhooks[node] = await get_webhook_for_channel(node)
 
 	print('all webhooks cached')
-
-	global banlist
-	kafka = 708095054748844082
-	mimubot = 493716749342998541
-	dmitrij = 239165690232307713
-	echo = 472692106150805505
-	yuphph = 127243394559770624
-	murtz = 389291792471687178
-	console = 1026852181841817682
-	banlist = [kafka, mimubot, dmitrij, echo, yuphph, murtz, console]
 
 	print('banlist stored')
 
@@ -312,6 +303,8 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 	if 'mishdebug' in to_send:
 		to_send = '```' + repr(to_send.replace('```','')) + '```'
 
+	to_send = re.sub(r"(https?://(?:youtube\.com/watch\?v=[^&]*|youtu\.be/[^?]*)).si=[^&]*(&t=.*)?","\g<1>\g<2>",to_send)
+
 	if len(to_send) > 1000 and replied_message:
 		to_send = prune_replies(to_send , 1000)
 	
@@ -412,6 +405,15 @@ async def on_message(message: discord.Message):
 	if message.content == prefix + 'servers':
 		await message.channel.send(serverdescs)
 
+	if message.content.startswith(prefix+'shutthefuckup '):
+		try:
+			to_ban = int(message.content.replace(prefix+'shutthefuckup ',''))
+		except:
+			await message.channel.send('invalid arguments')
+		with open('banlist.txt','a') as balls:
+			balls.write(f'\n{to_ban}')
+		banlist.append(int(to_ban))
+
 	# this is bad code. why would you write it in this way
 	if message.content.startswith(prefix + 'telephoneprefix') or message.content.startswith(prefix + 'tpprefix'):
 		if message.content.replace(prefix + 'telephoneprefix' , '').replace(prefix + 'tpprefix' , '') == '':
@@ -419,7 +421,8 @@ async def on_message(message: discord.Message):
 		elif message.content.startswith(prefix + 'telephoneprefix ') or message.content.startswith(prefix + 'tpprefix '):
 			if message.author.guild_permissions.administrator:
 				telephoneprefix = message.content.replace(prefix + 'telephoneprefix ' , '').replace(prefix + 'tpprefix ' , '')
-				open('telephoneprefix.txt','w').write(telephoneprefix)
+				with open('telephoneprefix.txt','w') as prefixfile:
+					prefixfile.write(telephoneprefix)
 				await message.channel.send(f'telephone prefix set to {telephoneprefix}')
 			else:
 				await message.channel.send('you do not have perms to do this')
@@ -430,7 +433,8 @@ async def on_message(message: discord.Message):
 	
 	if message.content.startswith(telephoneprefix):
 		latesttelephone = message.jump_url
-		open('telephonelatest.txt','w').write(latesttelephone)
+		with open('telephonelatest.txt','w') as latest:
+			latest.write(latesttelephone)
 
 	# bridge
 
