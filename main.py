@@ -406,13 +406,17 @@ async def on_message(message: discord.Message):
 		await message.channel.send(serverdescs)
 
 	if message.content.startswith(prefix+'shutthefuckup '):
-		try:
-			to_ban = int(message.content.replace(prefix+'shutthefuckup ',''))
-		except:
-			await message.channel.send('invalid arguments')
-		with open('banlist.txt','a') as balls:
-			balls.write(f'\n{to_ban}')
-		banlist.append(int(to_ban))
+		if message.author.guild_permissions.administrator:
+			try:
+				to_ban = int(message.content.replace(prefix+'shutthefuckup ',''))
+			except:
+				await message.channel.send('invalid arguments')
+			with open('banlist.txt','a') as balls:
+				balls.write(f'\n{to_ban}')
+			banlist.append(int(to_ban))
+			await message.channel.send(f'banned user {to_ban}')
+		else:
+			await message.channel.send('you do not have permissions')
 
 	# this is bad code. why would you write it in this way
 	if message.content.startswith(prefix + 'telephoneprefix') or message.content.startswith(prefix + 'tpprefix'):
