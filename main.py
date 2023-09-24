@@ -30,6 +30,7 @@ __mishnet commands:__
 - {prefix}telephone - sends a jump link to the latest telephone game entry
 - {prefix}telephoneprefix - tells you the prefix used to mark telephone messages (alias: {prefix}tpprefix)
 - {prefix}telephoneprefix [prefix here] - sets the telephone prefix. admin required (alias: {prefix}tpprefix)
+- {prefix}shutthefuckup [userid] - bans a user from mishnet
 the []s aren't part of the command
 __reaction functions:__
 - :x: - deletes a bridged message
