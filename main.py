@@ -518,6 +518,7 @@ async def on_message_delete(message: discord.Message):
 		try:
 			await message.delete()
 		except discord.errors.NotFound:
+			print(f'could not delete in {message.guild.name}')
 			pass
 
 	await asyncio.gather(*[delete(duplicate) for duplicate in duplicates])
