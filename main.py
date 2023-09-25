@@ -56,10 +56,8 @@ this is a list of every connected server along with a brief description of them
 - hallowspeak - the server for my conlanging project Hallowspeak
 - prolangs - the server for elemenopi's webcomic Prolangs, about humanised versions of popular conlangs
 - meriakcottage - idk
-- digiserver - one of the oldest conlang servers on discord, created as smaller and chiller alternative to the r/conlangs discord server
 - merrycord - merrybot (also known as evie)'s personal friend server
 - ostracod - the server about the conlangs and other projects made by ostracod, creator of vötgil among others
-- osscord - oss's personal friend server
 - conserver - public conlanging server created by console
 - marciland - server, created by marci, of one of the main friend groups across mishnet after their individual servers became no longer useable
 - kathycord - i really don't know man. made by katherine
@@ -117,7 +115,6 @@ async def on_ready():
 	hallowspeak = client.get_channel(986616150492323840)
 	prolangs = client.get_channel(988876878582546472)
 	meriakcottage = client.get_channel(1046824467055263824)
-	digiserver = client.get_channel(1070736308806373457)
 	merrycord = client.get_channel(1124169206427045979)
 	ostracod = client.get_channel(1093661502084493422)
 	conserver = client.get_channel(1114983071083667657)
@@ -132,7 +129,6 @@ async def on_ready():
 	hallowspeak2 = client.get_channel(1006526679071596574)
 	prolangs2 = client.get_channel(1006660045511086080)
 	meriakcottage2 = client.get_channel(964755175770325002)
-	digiserver2 = client.get_channel(1070736404155478137)
 	merrycord2 = client.get_channel(1124169171568164986)
 	ostracod2 = client.get_channel(1093661477111611443)
 	conserver2 = client.get_channel(1114983094630490133)
@@ -141,8 +137,8 @@ async def on_ready():
 	openbook2 = client.get_channel(1139256312488808488)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage ,  digiserver , merrycord , ostracod , conserver , marciland , kathycord , openbook] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , digiserver2 , merrycord2 , ostracod2 , conserver2 , marciland2 , kathycord2 , openbook2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage , merrycord , ostracod , conserver , marciland , kathycord , openbook] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , merrycord2 , ostracod2 , conserver2 , marciland2 , kathycord2 , openbook2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	print('all channels gotten')
@@ -156,7 +152,6 @@ async def on_ready():
 		hallowspeak : 'Hallowspeak',
 		prolangs : 'prolangs',
 		meriakcottage : 'mɛriak cottage',
-		digiserver : 'digiserver',
 		merrycord : 'merrycord',
 		ostracod : 'ostracod conlangs',
 		conserver : 'conserver',
@@ -171,7 +166,6 @@ async def on_ready():
 		hallowspeak2 : 'Hallowspeak',
 		prolangs2 : 'prolangs',
 		meriakcottage2 : 'mɛriak cottage',
-		digiserver2 : 'digiserver',
 		merrycord2 : 'merrycord',
 		ostracod2 : 'ostracod conlangs',
 		conserver2 : 'conserver',
