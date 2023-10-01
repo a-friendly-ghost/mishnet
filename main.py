@@ -575,6 +575,9 @@ async def update_reactions(message: discord.Message):
 @client.event
 async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Member, discord.User]):
 
+	if member.id in banlist:
+		return
+
 	global poll_lock
 
 	if reaction.message.channel not in [channel for group in mishnet_channels for channel in group]:
