@@ -78,7 +78,13 @@ ready = False
 
 telephoneprefix = open('telephoneprefix.txt','r').read()
 latesttelephone = open('telephonelatest.txt','r').read()
-banlist = [int(i) for i in open('banlist.txt','r').readlines()]
+banlist = []
+with open('banlist.txt','r') as banfile:
+	for line in banfile.readlines():
+		if int(line) not in banlist:
+			banlist.append(int(line))
+with open('banlist.txt','w') as banfile:
+	banfile.write('\n'.join(banlist))
 
 async def get_webhook_for_channel(channel: discord.TextChannel):
 	# webhooks that we own have a non-None token attribute
@@ -89,6 +95,7 @@ async def get_webhook_for_channel(channel: discord.TextChannel):
 	print(f"Making webhook for {channel.name}...")
 	return await channel.create_webhook(name="mishnet webhook", reason="what are you a cop?")
 
+# shows the typing indicator based on the list of currently typing users
 async def manage_typing_indicator():
 	# TODO: async this
 	for group in mishnet_channels:
@@ -99,6 +106,7 @@ async def manage_typing_indicator():
 					await asyncio.sleep(1)
 	return
 
+
 @client.event
 async def on_ready():
 	print('on ready begin')
@@ -107,6 +115,8 @@ async def on_ready():
 
 	# todo: store these more neatly
 	# oh my god mish please do this -mish
+
+	# these are stored here right now, because i need to do more database work to store them there, but i can't do it myself (i don't know how)
 
 	mishserver = client.get_channel(915251024174940160)
 	agonyserver = client.get_channel(746466196978794517)
@@ -143,6 +153,7 @@ async def on_ready():
 
 	print('all channels gotten')
 
+	# this part will also be much cleaner once the database is sorted
 	global serverNames
 	serverNames = {
 		mishserver : 'mishserver',
@@ -174,6 +185,7 @@ async def on_ready():
 		openbook2 : 'open book'
 	}
 
+	# put all the webhooks in a dict for faster retrieval
 	global webhooks
 	webhooks = {}
 	for mishnet_channel in mishnet_channels:
@@ -184,6 +196,7 @@ async def on_ready():
 
 	print('banlist stored')
 
+	# set up users typing structure thing
 	global users_typing
 	users_typing = {}
 	for mishnet_channel in mishnet_channels:
@@ -278,6 +291,7 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 	# future mish here: i am crying about it actually thanks
 	# future future mish here (multiple months later): what the actual fuck what was wrong with you (me)
 
+	# replaces channel links with "channel name in server name"
 	channel_links = re.findall(r"(?<=<#)\d+(?=>)" , to_send)
 	for match in channel_links:
 		linked_channel = await client.fetch_channel(match)
@@ -290,14 +304,17 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 				# linked channel is not a mishnet channel
 				to_send = to_send.replace(f"<#{match}>" , f"`#{linked_channel.name} in {linked_channel.guild.name}`") # replace with mishnet name for server once channels are endatabased
 
+	# replaces role pings with "role name role in server name"
 	role_pings = re.findall(r"(?<=<@&)\d+(?=>)" , to_send)
 	for match in role_pings:
 		pinged_role = next(i for i in original_guild.roles if i.id == int(match))
 		to_send = to_send.replace(f"<@&{match}>" , f"`@{pinged_role.name} role in {original_guild}`")
 	
+	# just for debugging
 	if 'mishdebug' in to_send:
 		to_send = '```' + repr(to_send.replace('```','')) + '```'
 
+	# removes tracking junk from youtube urls
 	to_send = re.sub(r"(https?://(?:youtube\.com/watch\?v=[^&]*|youtu\.be/[^?]*)).si=[^&]*(&t=.*)?","\g<1>\g<2>",to_send)
 
 	if len(to_send) > 1000 and replied_message:
@@ -436,6 +453,7 @@ async def on_message(message: discord.Message):
 			latest.write(latesttelephone)
 
 	# bridge
+	# bridging code will be moved to the whole queue operation once i try to tackle that
 
 	global users_typing
 
@@ -447,7 +465,6 @@ async def on_message(message: discord.Message):
 		return
 
 	# typing indicator runs out immediately when message is sent
-
 	if message.author in users_typing[message.channel]:
 		users_typing[message.channel].remove(message.author)
 
