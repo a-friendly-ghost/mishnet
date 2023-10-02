@@ -83,7 +83,7 @@ with open('banlist.txt','r') as banfile:
 		if int(line) not in banlist:
 			banlist.append(int(line))
 with open('banlist.txt','w') as banfile:
-	banfile.write('\n'.join(banlist))
+	banfile.write('\n'.join([str(i) for i in banlist]))
 
 async def get_webhook_for_channel(channel: discord.TextChannel):
 	# webhooks that we own have a non-None token attribute
