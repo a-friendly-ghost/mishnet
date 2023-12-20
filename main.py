@@ -74,6 +74,7 @@ if sys.platform == 'win32':
 # just "channel" though refers to like, the discord channels, also called nodes when i remember to call them that
 
 ready = False
+error_counter = 0
 
 telephoneprefix = open('telephoneprefix.txt','r').read()
 latesttelephone = open('telephonelatest.txt','r').read()
@@ -105,6 +106,11 @@ async def manage_typing_indicator():
 					await asyncio.sleep(1)
 	return
 
+async def reset_error_counter():
+	global error_counter
+	while True:
+		await asyncio.sleep(10)
+		error_counter = 0
 
 @client.event
 async def on_ready():
@@ -195,24 +201,29 @@ async def on_ready():
 	print('typing dict initialised')
 
 	#temporary
-	async def delete_errors(channel):
-		async for message in channel.history(limit=500):
-			if message.content in ["oopsie doopsie! da code went fucky wucky! 404 Not Found (error code: 10015): Unknown Webhook",
-						  "when the exception is sus: 'NoneType' object has no attribute 'guild'",
-						  "oopsie woopsie our code kitty is hard at work: 'NoneType' object has no attribute 'guild'",
-						  "exception messag 404 Not Found (error code: 10015): Unknown Webhook e (sussy)",
-						  "oopsie woopsie our code kitty is hard at work: 404 Not Found (error code: 10015): Unknown Webhook",
-						  "oopsie doopsie! da code went fucky wucky! 'NoneType' object has no attribute 'guild'",
-						  "when the exception is sus: 404 Not Found (error code: 10015): Unknown Webhook",
-						  "hiiii sorryyyy there was a timeout errorrr :c u may want to check if your message or your edit went through"]:
-				try:
-					await asyncio.sleep(1)
-					await message.delete()
-				except discord.RateLimited() as ratelimit:
-					print('excepted ratelimit', ratelimit)
-					time.sleep(ratelimit.retry_after)
+	# async def delete_errors(channel):
+	# 	async for message in channel.history(limit=500):
+	# 		if message.content in ["oopsie doopsie! da code went fucky wucky! 404 Not Found (error code: 10015): Unknown Webhook",
+	# 					  "when the exception is sus: 'NoneType' object has no attribute 'guild'",
+	# 					  "oopsie woopsie our code kitty is hard at work: 'NoneType' object has no attribute 'guild'",
+	# 					  "exception messag 404 Not Found (error code: 10015): Unknown Webhook e (sussy)",
+	# 					  "oopsie woopsie our code kitty is hard at work: 404 Not Found (error code: 10015): Unknown Webhook",
+	# 					  "oopsie doopsie! da code went fucky wucky! 'NoneType' object has no attribute 'guild'",
+	# 					  "when the exception is sus: 404 Not Found (error code: 10015): Unknown Webhook",
+	# 					  "hiiii sorryyyy there was a timeout errorrr :c u may want to check if your message or your edit went through"]:
+	# 			try:
+	# 				await asyncio.sleep(1)
+	# 				await message.delete()
+	# 			except discord.RateLimited() as ratelimit:
+	# 				print('excepted ratelimit', ratelimit)
+	# 				time.sleep(ratelimit.retry_after)
 
-	await asyncio.gather(*[delete_errors(channel) for channel in [i for group in mishnet_channels for i in group]])
+	# await asyncio.gather(*[delete_errors(channel) for channel in [i for group in mishnet_channels for i in group]])
+
+	#add error counter reset loop to event loop
+
+	loop = asyncio.get_event_loop()
+	loop.create_task(reset_error_counter())
 
 	global ready
 	ready = True
