@@ -210,6 +210,7 @@ async def on_ready():
 						  "when the exception is sus: 404 Not Found (error code: 10015): Unknown Webhook",
 						  "hiiii sorryyyy there was a timeout errorrr :c u may want to check if your message or your edit went through"]:
 				try:
+					time.sleep(0.02)
 					await message.delete()
 				except: pass
 
