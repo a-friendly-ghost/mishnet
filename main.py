@@ -788,6 +788,12 @@ async def start_everything():
 
 	print('database connected')
 
-	await client.start(os.getenv('TOKEN'))
+	started = False
+	while not started:
+		try:
+			await client.start(os.getenv('TOKEN'))
+			started = True
+		except:
+			time.sleep(120)
 
 asyncio.run(start_everything())
