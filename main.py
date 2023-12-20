@@ -210,7 +210,7 @@ async def on_ready():
 						  "when the exception is sus: 404 Not Found (error code: 10015): Unknown Webhook",
 						  "hiiii sorryyyy there was a timeout errorrr :c u may want to check if your message or your edit went through"]:
 				try:
-					await asyncio.sleep(0.6)
+					await asyncio.sleep(1)
 					await message.delete()
 				except discord.Ratelimited() as ratelimit:
 					await asyncio.sleep(ratelimit.retry_after)
