@@ -182,6 +182,7 @@ async def on_ready():
 	for mishnet_channel in mishnet_channels:
 		for node in mishnet_channel:
 			webhooks[node] = await get_webhook_for_channel(node)
+			print(node)
 
 	print('all webhooks cached')
 
