@@ -126,7 +126,6 @@ async def on_ready():
 	meriakcottage = client.get_channel(1046824467055263824)
 	merrycord = client.get_channel(1124169206427045979)
 	ostracod = client.get_channel(1093661502084493422)
-	marciland = client.get_channel(1115636041475440750)
 	openbook = client.get_channel(1139256333540012082)
 
 	mishserver2 = client.get_channel(1006522289048784967)
@@ -138,12 +137,11 @@ async def on_ready():
 	meriakcottage2 = client.get_channel(964755175770325002)
 	merrycord2 = client.get_channel(1124169171568164986)
 	ostracod2 = client.get_channel(1093661477111611443)
-	marciland2 = client.get_channel(1115635971216650271)
 	openbook2 = client.get_channel(1139256312488808488)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage , merrycord , ostracod , marciland , openbook] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , merrycord2 , ostracod2 , marciland2 , openbook2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage , merrycord , ostracod , openbook] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , merrycord2 , ostracod2 , openbook2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	print('all channels gotten')
@@ -160,7 +158,6 @@ async def on_ready():
 		meriakcottage : 'mɛriak cottage',
 		merrycord : 'merrycord',
 		ostracod : 'ostracod conlangs',
-		marciland : 'marciland' ,
 		openbook : 'open book',
 
 		mishserver2 : 'mishserver',
@@ -172,7 +169,6 @@ async def on_ready():
 		meriakcottage2 : 'mɛriak cottage',
 		merrycord2 : 'merrycord',
 		ostracod2 : 'ostracod conlangs',
-		marciland2 : 'marciland',
 		openbook2 : 'open book'
 	}
 
