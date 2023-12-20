@@ -208,7 +208,7 @@ async def on_ready():
 				try:
 					await asyncio.sleep(1)
 					await message.delete()
-				except discord.Ratelimited() as ratelimit:
+				except discord.RateLimited() as ratelimit:
 					print('excepted ratelimit', ratelimit)
 					time.sleep(ratelimit.retry_after)
 
