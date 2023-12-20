@@ -764,6 +764,7 @@ messages = [
 ]
 @client.event
 async def on_error(event, *args, **kwargs):
+	global error_counter
 	# FIXME: this is _the_ most horrible way to find the channel. please for the love of god fix this
 	for arg in args:
 		if hasattr(arg, "channel") and isinstance(arg.channel, discord.TextChannel):
@@ -785,6 +786,12 @@ async def on_error(event, *args, **kwargs):
  	# this is just hackish debugging
 	print('on error exception:')
 	traceback.print_exception(exception_type, exception, exc_traceback)
+
+	error_counter += 1
+
+	if error_counter > 20:
+		await channel.send("error spam detected: shutting off mishnet until error can be fixed.")
+		return await client.close()
 
 # start bot
 async def start_everything():
