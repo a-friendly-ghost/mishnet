@@ -200,6 +200,21 @@ async def on_ready():
 
 	print('typing dict initialised')
 
+	#temporary
+	async def delete_errors(channel):
+		async for message in channel.history(limit=4000):
+			if message.content in ["oopsie doopsie! da code went fucky wucky! 404 Not Found (error code: 10015): Unknown Webhook",
+						  "when the exception is sus: 'NoneType' object has no attribute 'guild'",
+						  "oopsie woopsie our code kitty is hard at work: 'NoneType' object has no attribute 'guild'",
+						  "exception messag 404 Not Found (error code: 10015): Unknown Webhook e (sussy)",
+						  "oopsie woopsie our code kitty is hard at work: 404 Not Found (error code: 10015): Unknown Webhook",
+						  "oopsie doopsie! da code went fucky wucky! 'NoneType' object has no attribute 'guild'"]:
+				try:
+					await message.delete()
+				except: pass
+
+	await asyncio.gather(*[delete_errors(channel) for channel in [i for group in mishnet_channels for i in group]])
+
 	global ready
 	ready = True
 	print('on ready end')
