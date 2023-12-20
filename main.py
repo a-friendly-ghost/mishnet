@@ -200,7 +200,7 @@ async def on_ready():
 
 	#temporary
 	async def delete_errors(channel):
-		async for message in channel.history(limit=4000):
+		async for message in channel.history(limit=500):
 			if message.content in ["oopsie doopsie! da code went fucky wucky! 404 Not Found (error code: 10015): Unknown Webhook",
 						  "when the exception is sus: 'NoneType' object has no attribute 'guild'",
 						  "oopsie woopsie our code kitty is hard at work: 'NoneType' object has no attribute 'guild'",
