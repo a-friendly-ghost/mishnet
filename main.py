@@ -206,7 +206,9 @@ async def on_ready():
 						  "oopsie woopsie our code kitty is hard at work: 'NoneType' object has no attribute 'guild'",
 						  "exception messag 404 Not Found (error code: 10015): Unknown Webhook e (sussy)",
 						  "oopsie woopsie our code kitty is hard at work: 404 Not Found (error code: 10015): Unknown Webhook",
-						  "oopsie doopsie! da code went fucky wucky! 'NoneType' object has no attribute 'guild'"]:
+						  "oopsie doopsie! da code went fucky wucky! 'NoneType' object has no attribute 'guild'",
+						  "when the exception is sus: 404 Not Found (error code: 10015): Unknown Webhook",
+						  "hiiii sorryyyy there was a timeout errorrr :c u may want to check if your message or your edit went through"]:
 				try:
 					await message.delete()
 				except: pass
