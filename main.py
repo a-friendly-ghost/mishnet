@@ -213,7 +213,8 @@ async def on_ready():
 					await asyncio.sleep(1)
 					await message.delete()
 				except discord.Ratelimited() as ratelimit:
-					await asyncio.sleep(ratelimit.retry_after)
+					print('excepted ratelimit', ratelimit)
+					time.sleep(ratelimit.retry_after)
 
 	await asyncio.gather(*[delete_errors(channel) for channel in [i for group in mishnet_channels for i in group]])
 
