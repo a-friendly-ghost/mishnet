@@ -794,6 +794,7 @@ async def start_everything():
 			await client.start(os.getenv('TOKEN'))
 			started = True
 		except:
+			print('still timed out!')
 			time.sleep(120)
 
 asyncio.run(start_everything())
