@@ -55,11 +55,7 @@ this is a list of every connected server along with a brief description of them
 - ccj - the server for the r/conlangcirclejerk subreddit, though moreso its own community with little actual link to the subreddit at all
 - hallowspeak - the server for my conlanging project Hallowspeak
 - prolangs - the server for elemenopi's webcomic Prolangs, about humanised versions of popular conlangs
-- meriakcottage - idk
-- merrycord - merrybot (also known as evie)'s personal friend server
 - ostracod - the server about the conlangs and other projects made by ostracod, creator of vötgil among others
-- marciland - server, created by marci, of one of the main friend groups across mishnet after their individual servers became no longer useable
-- kathycord - i really don't know man. made by katherine
 - open book - a server focused around the idea that conlanging and worldbuilding is an artform like any other, created by creativitytheemotion
 """
 
@@ -129,7 +125,6 @@ async def on_ready():
 	ccjserver = client.get_channel(629816294870351884)
 	hallowspeak = client.get_channel(986616150492323840)
 	prolangs = client.get_channel(988876878582546472)
-	meriakcottage = client.get_channel(1046824467055263824)
 	ostracod = client.get_channel(1093661502084493422)
 	openbook = client.get_channel(1139256333540012082)
 
@@ -139,13 +134,12 @@ async def on_ready():
 	ccjserver2 = client.get_channel(1055428091285086218)
 	hallowspeak2 = client.get_channel(1006526679071596574)
 	prolangs2 = client.get_channel(1006660045511086080)
-	meriakcottage2 = client.get_channel(964755175770325002)
 	ostracod2 = client.get_channel(1093661477111611443)
 	openbook2 = client.get_channel(1139256312488808488)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs ,  meriakcottage , ostracod , openbook] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , meriakcottage2 , ostracod2 , openbook2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs , ostracod , openbook] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , ostracod2 , openbook2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	print('all channels gotten')
@@ -159,7 +153,6 @@ async def on_ready():
 		ccjserver : 'ccj',
 		hallowspeak : 'Hallowspeak',
 		prolangs : 'prolangs',
-		meriakcottage : 'mɛriak cottage',
 		ostracod : 'ostracod conlangs',
 		openbook : 'open book',
 
@@ -169,7 +162,6 @@ async def on_ready():
 		ccjserver2: 'ccj',
 		hallowspeak2 : 'Hallowspeak',
 		prolangs2 : 'prolangs',
-		meriakcottage2 : 'mɛriak cottage',
 		ostracod2 : 'ostracod conlangs',
 		openbook2 : 'open book'
 	}
