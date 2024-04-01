@@ -36,6 +36,7 @@ uwureplacements = {
 }
 def uwu(string):
 	string = string.lower()
+	stringlist = list(string)
 
 	for index , i in enumerate(stringlist):
 		if i == ',':
