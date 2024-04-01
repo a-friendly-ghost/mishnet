@@ -17,6 +17,61 @@ prefix = 'mn!'
 poll_start = 'poll:'
 poll_lock = asyncio.Lock()
 
+##### APRIL FOOLS UPDATE #####
+
+vowels = 'aeiou'
+
+def simplereplace(string,dict):
+	for key in dict.keys():
+		string = string.replace(key,dict[key])
+	return string
+
+uwureplacements = {
+	'r':'w',
+	'l':'w',
+	'the':'da',
+	'th':'d',
+	'fuck':'fwick',
+	'dude':'fwen'
+}
+def uwu(string):
+	string = string.lower()
+
+	for index , i in enumerate(stringlist):
+		if i == ',':
+			stringlist[index] = ','*random.randint(1,8)
+		try:
+			if i in 'mn' and stringlist[index + 1] in vowels:
+				if stringlist[index + 1] == 'e':
+					if stringlist[index + 2] != ' ':
+						stringlist[index] = stringlist[index] + 'y'
+				else:
+					stringlist[index] = stringlist[index] + 'y'
+		except: pass
+
+		try:
+			if i == 'o':
+				if stringlist[index - 1] not in vowels and stringlist[index + 1] not in vowels:
+					choice = random.randint(1,3)
+					if choice == 1:
+						stringlist[index] = 'owo'
+			if i == 'u':
+				if stringlist[index - 1] not in vowels and stringlist[index + 1] not in vowels:
+					choice = random.randint(1, 3)
+					if choice == 1:
+						stringlist[index] = 'uwu'
+		except: pass
+
+	string = simplereplace(string,uwureplacements)
+	stringlist = list(string)
+
+	new = ''.join(stringlist)
+	new += ' ' + random.choice(['uwu','owo','qwq','-w-'])
+
+	return new
+
+##### APRIL FOOLS UPDATE #####
+
 commands = f"""
 __mishnet commands:__
 - {prefix}help - sends this message (alias: {prefix}info)
@@ -290,7 +345,7 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 	if content.startswith('> '): # separates reply quote blocks and quote blocks already in the message
 		to_send += '\n'
 
-	to_send += content
+	to_send += uwu(content)
 
 	to_send += ' ' + ' '.join(sticker.url for sticker in stickers)
 
