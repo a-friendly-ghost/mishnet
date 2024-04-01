@@ -36,6 +36,8 @@ uwureplacements = {
 }
 def uwu(string):
 	string = string.lower()
+
+	string = simplereplace(string,uwureplacements)
 	stringlist = list(string)
 
 	for index , i in enumerate(stringlist):
@@ -62,9 +64,6 @@ def uwu(string):
 					if choice == 1:
 						stringlist[index] = 'uwu'
 		except: pass
-
-	string = simplereplace(string,uwureplacements)
-	stringlist = list(string)
 
 	new = ''.join(stringlist)
 	new += ' ' + random.choice(['uwu','owo','qwq','-w-'])
