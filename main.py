@@ -20,16 +20,17 @@ poll_lock = asyncio.Lock()
 commands = f"""
 __mishnet commands:__
 - {prefix}help - sends this message (alias: {prefix}info)
+- {prefix}explain - sends a message explaining what mishnet is
 - {prefix}perftest - tests bridge performance time
 - {prefix}nick [nick here] - changes your mishnet nickname (alias: {prefix}nickname)
 - {prefix}nick - tells you how other servers see your name (aliases: {prefix}nicktest , {prefix}nickname)
 - {prefix}clearnick - resets your mishnet nickname to use your username
-- {prefix}poll [optional text] - creates a poll message
+- (deprecated) {prefix}poll [optional text] - creates a poll message
 - {prefix}rules - sends the rules of mishnet
 - {prefix}servers - sends a description of each server connected to mishnet
-- {prefix}telephone - sends a jump link to the latest telephone game entry
-- {prefix}telephoneprefix - tells you the prefix used to mark telephone messages (alias: {prefix}tpprefix)
-- {prefix}telephoneprefix [prefix here] - sets the telephone prefix. admin required (alias: {prefix}tpprefix)
+- (deprecated) {prefix}telephone - sends a jump link to the latest telephone game entry
+- (deprecated) {prefix}telephoneprefix - tells you the prefix used to mark telephone messages (alias: {prefix}tpprefix)
+- (deprecated) {prefix}telephoneprefix [prefix here] - sets the telephone prefix. admin required (alias: {prefix}tpprefix)
 - {prefix}shutthefuckup [userid] - bans a user from mishnet
 the []s aren't part of the command
 __reaction functions:__
@@ -37,12 +38,21 @@ __reaction functions:__
 - :bell: - pings the person reacted to
 """
 
+explanation = """
+mishnet is a message bridging bot created by me (mish), which bridges messages between servers. this means that messages sent in one server are also sent to all the rest, allowing for cross-server communication.
+mishnet uses discord webhooks to bridge messages from other servers. this is why messages from other servers will appear with a "APP" label beside their name. please note that these are real people, not bots, despite the label.
+mishnet was initially created for two reasons :
+- before mishnet, many smaller conlanging servers were quite inactive, and often, you would get barely any feedback or sometimes no response at all when you posted something you're working on
+- for people who are in many conlanging servers, it is a common thing to want to post something in all these servers at once, both to get a wider range of responses to it, and also just because of wanting to share something with multiple friendgroups they may be a part of
+since creating mishnet, it has formed into sort of its own nice little community as well. welcome to mishnet !
+"""
+
 rules = """
 the mishnet rules are a combination of the rules of mishnet's connected servers, alongside what i (mish) consider to be right and wrong
 - no bigotry of any kind, such as on the basis of race, nationality, religion, gender, sexual orientation, ability, etc
 - respect your fellow mishnet users, including their wishes regarding not seeing particular things, words, or topics
 - no explicit or shocking images or videos
-if you see someone breaking these rules or doing something you consider wrong, please ping me personally. if i am not online, ping one of the mods of the server you are in
+if you see someone breaking these rules or doing something you consider wrong, mishnet strongly recommends that please ping me personally, rather than responding to the individual. if i am not online, ping one of the mods of the server you are in
 breaking a rule will result in recieving a warn; three warns will result in being banned from mishnet
 please remember that given the wide range of mishnet, not all members may be familiar with what makes you uncomfortable, even if it seems obvious from your perspective
 """
@@ -381,12 +391,16 @@ async def on_message(message: discord.Message):
 					return
 
 	# commands
+	# TODO: update to slash commands
 
 	if message.content.startswith(prefix+'help') or message.content.startswith(prefix+'info'):
 		await message.channel.send(commands)
 	
 	if message.content == prefix + "uwu": #vitally important command
 		await message.channel.send('uwu')
+
+	if message.content.startswith(prefix+"explain"):
+		await message.channel.send(explanation)
 
 	# TODO: oh my god please write a separate function for aliases
 	if message.content == prefix+"nick" or message.content == prefix+"nickname" or message.content == prefix+"nicktest": # nick(test) command
