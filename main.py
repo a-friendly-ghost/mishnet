@@ -68,6 +68,7 @@ this is a list of every connected server along with a brief description of them
 - ostracod - the server about the conlangs and other projects made by ostracod, creator of vötgil among others
 - open book - a server focused around the idea that conlanging and worldbuilding is an artform like any other, created by creativitytheemotion
 - hellcord - a friends server owned by baphomet
+- conlanging assembly - what if conlang server but staff is mostly polish
 """
 
 mishnet_channels = None
@@ -125,7 +126,7 @@ async def on_ready():
 
 	print(f'{client.user} has connected to Discord!')
 
-	# todo: store these more neatly
+	# TODO: store these more neatly
 	# oh my god mish please do this -mish
 
 	# these are stored here right now, because i need to do more database work to store them there, but i can't do it myself (i don't know how)
@@ -139,6 +140,7 @@ async def on_ready():
 	ostracod = client.get_channel(1093661502084493422)
 	openbook = client.get_channel(1139256333540012082)
 	hellcord = client.get_channel(1274801769578496135)
+	assembly = client.get_channel(1303073767630573628)
 
 	mishserver2 = client.get_channel(1006522289048784967)
 	agonyserver2 = client.get_channel(1006237275664949349)
@@ -149,10 +151,11 @@ async def on_ready():
 	ostracod2 = client.get_channel(1093661477111611443)
 	openbook2 = client.get_channel(1139256312488808488)
 	hellcord2 = client.get_channel(1274801731007545416)
+	assembly2 = client.get_channel(1303073746290212906)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs , ostracod , openbook , hellcord] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , ostracod2 , openbook2 , hellcord2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs , ostracod , openbook , hellcord , assembly] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , ostracod2 , openbook2 , hellcord2 , assembly2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	print('all channels gotten')
@@ -169,6 +172,7 @@ async def on_ready():
 		ostracod : 'ostracod conlangs',
 		openbook : 'open book',
 		hellcord : 'hellcord',
+		assembly : 'conlanging assembly',
 
 		mishserver2 : 'mishserver',
 		agonyserver2 : 'agonyserver',
@@ -178,7 +182,8 @@ async def on_ready():
 		prolangs2 : 'prolangs',
 		ostracod2 : 'ostracod conlangs',
 		openbook2 : 'open book',
-		hellcord2 : 'hellcord'
+		hellcord2 : 'hellcord',
+		assembly2 : 'conlanging assembly'
 	}
 
 	# put all the webhooks in a dict for faster retrieval
