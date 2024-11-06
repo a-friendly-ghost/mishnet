@@ -140,7 +140,7 @@ async def on_ready():
 	ostracod = client.get_channel(1093661502084493422)
 	openbook = client.get_channel(1139256333540012082)
 	hellcord = client.get_channel(1274801769578496135)
-	assembly = client.get_channel(1303073767630573628)
+	assembly = client.get_channel(1303762738710843413)
 
 	mishserver2 = client.get_channel(1006522289048784967)
 	agonyserver2 = client.get_channel(1006237275664949349)
@@ -151,7 +151,7 @@ async def on_ready():
 	ostracod2 = client.get_channel(1093661477111611443)
 	openbook2 = client.get_channel(1139256312488808488)
 	hellcord2 = client.get_channel(1274801731007545416)
-	assembly2 = client.get_channel(1303073746290212906)
+	assembly2 = client.get_channel(1303762689939607662)
 
 	global mishnet1 , mishnet2 , mishnet_channels
 	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs , ostracod , openbook , hellcord , assembly] # conlanging
