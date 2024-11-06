@@ -450,7 +450,7 @@ async def on_message(message: discord.Message):
 		await message.channel.send(serverdescs)
 
 	if message.content.startswith(prefix+'shutthefuckup '):
-		if message.author.guild_permissions.administrator:
+		if message.author.guild_permissions.kick_members:
 			try:
 				to_ban = int(message.content.replace(prefix+'shutthefuckup ',''))
 			except:
@@ -792,6 +792,10 @@ async def on_error(event, *args, **kwargs):
 		# specific errors
 		if str(exception).split()[0] == "429": # timeout error
 			await channel.send('hiiii sorryyyy there was a timeout errorrr :c u may want to check if your message or your edit went through')
+		elif str(exception).split()[0] == "400":
+			await channel.send('ummmmmm,,, so there was like a 404 not found error, which *might* mean that a mishnet channel in one of the servers got deleted ? so like. i\'m gonna go to sleep (shut myself off) just to be safe okay baiii cyaaaaaa')
+			await asyncio.sleep(2)
+			return await client.close()
 		else:
 			await channel.send(random.choice(messages).format(str(exception)))
 
