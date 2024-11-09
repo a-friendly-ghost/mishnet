@@ -187,7 +187,7 @@ async def on_ready():
 		prolangs2 : 'prolangs',
 		ostracod2 : 'ostracod conlangs',
 		openbook2 : 'open book',
-		hellcord2 : 'hellcord',
+		hellcord2 : 'hellcord'
 	}
 
 	# put all the webhooks in a dict for faster retrieval
@@ -275,8 +275,9 @@ def prune_replies(content: str, length_limit: int) -> str:
 		else:
 			print(current_depth, lines_depths[current_depth][0]) # debug
 			prune_position = next(index for index , i in enumerate(lines_depths) if i[1] == current_depth)
-			lines_depths = [ (line , depth) for (line , depth) in lines_depths if depth < current_depth ] # remove all lines from the array greater than the current depth
-			lines_depths.insert(prune_position , (f"{'> '*current_depth}{max_depth-current_depth+1} more replies" , current_depth) ) # this cannot be inserted at the end because it is part of the message's length
+			lines_depths = [ (line , depth) for (line , depth) in lines_depths if depth <= current_depth ] # remove all lines from the array greater than the current depth
+			numberMoreReplies = max_depth-current_depth+1
+			lines_depths.insert(prune_position , (f"{'> '*current_depth}{numberMoreReplies} more {"reply" if numberMoreReplies == 1 else "replies"}" , current_depth) ) # this cannot be inserted at the end because it is part of the message's length
 	
 	return '\n'.join([i[0] for i in lines_depths])
 
@@ -351,7 +352,7 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 		to_send = '```' + repr(to_send.replace('```','')) + '```'
 
 	# removes tracking junk from youtube urls
-	to_send = re.sub(r"(https?://(?:youtube\.com/watch\?v=[^&]*|youtu\.be/[^?]*)).si=[^&]*(&t=.*)?","\g<1>\g<2>",to_send)
+	to_send = re.sub(r"(https?://(?:youtube\.com/watch\?v=[^&]*|youtu\.be/[^?]*)).si=[a-zA-Z_=]*","\g<1>",to_send)
 
 	if len(to_send) > 1000 and replied_message:
 		to_send = prune_replies(to_send , 1000)
