@@ -277,7 +277,7 @@ def prune_replies(content: str, length_limit: int) -> str:
 			prune_position = next(index for index , i in enumerate(lines_depths) if i[1] == current_depth)
 			lines_depths = [ (line , depth) for (line , depth) in lines_depths if depth <= current_depth ] # remove all lines from the array greater than the current depth
 			numberMoreReplies = max_depth-current_depth+1
-			lines_depths.insert(prune_position , (f"{'> '*current_depth}{numberMoreReplies} more {"reply" if numberMoreReplies == 1 else "replies"}" , current_depth) ) # this cannot be inserted at the end because it is part of the message's length
+			lines_depths.insert(prune_position , (f"{'> '*current_depth}{numberMoreReplies} more {('reply' if numberMoreReplies == 1 else 'replies')}" , current_depth) ) # this cannot be inserted at the end because it is part of the message's length
 	
 	return '\n'.join([i[0] for i in lines_depths])
 
