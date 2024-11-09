@@ -45,14 +45,23 @@ mishnet was initially created for two reasons :
 - before mishnet, many smaller conlanging servers were quite inactive, and often, you would get barely any feedback or sometimes no response at all when you posted something you're working on
 - for people who are in many conlanging servers, it is a common thing to want to post something in all these servers at once, both to get a wider range of responses to it, and also just because of wanting to share something with multiple friendgroups they may be a part of
 since creating mishnet, it has formed into sort of its own nice little community as well. welcome to mishnet !
+
+also please be aware that some things do not work in mishnet due to limitations with the discord bot python api :
+- stickers are bridged to other servers as images
+- custom emojis work, but only those from the servers that the mishnet bot is in
+- forwarding does not work. your message will not show up at all in other servers if you forward
+- discord polls do not work
+- if someone on another server adds an emoji reaction to your message, all servers will see it except for your own server
+these will be fixed as and when the api gets updated, or compromise solutions to these limitations are agreed upon
 """
 
 rules = """
+
 the mishnet rules are a combination of the rules of mishnet's connected servers, alongside what i (mish) consider to be right and wrong
 - no bigotry of any kind, such as on the basis of race, nationality, religion, gender, sexual orientation, ability, etc
 - respect your fellow mishnet users, including their wishes regarding not seeing particular things, words, or topics
 - no explicit or shocking images or videos
-if you see someone breaking these rules or doing something you consider wrong, mishnet strongly recommends that please ping me personally, rather than responding to the individual. if i am not online, ping one of the mods of the server you are in
+- if you see someone breaking these rules or doing something you consider wrong, mishnet strongly recommends that you please ping me personally, rather than responding to the individual. if i am not online, ping one of the mods of the server you are in
 breaking a rule will result in recieving a warn; three warns will result in being banned from mishnet
 please remember that given the wide range of mishnet, not all members may be familiar with what makes you uncomfortable, even if it seems obvious from your perspective
 """
@@ -68,7 +77,6 @@ this is a list of every connected server along with a brief description of them
 - ostracod - the server about the conlangs and other projects made by ostracod, creator of vötgil among others
 - open book - a server focused around the idea that conlanging and worldbuilding is an artform like any other, created by creativitytheemotion
 - hellcord - a friends server owned by baphomet
-- conlanging assembly - what if conlang server but staff is mostly polish
 """
 
 mishnet_channels = None
@@ -140,7 +148,6 @@ async def on_ready():
 	ostracod = client.get_channel(1093661502084493422)
 	openbook = client.get_channel(1139256333540012082)
 	hellcord = client.get_channel(1274801769578496135)
-	assembly = client.get_channel(1303762738710843413)
 
 	mishserver2 = client.get_channel(1006522289048784967)
 	agonyserver2 = client.get_channel(1006237275664949349)
@@ -151,11 +158,10 @@ async def on_ready():
 	ostracod2 = client.get_channel(1093661477111611443)
 	openbook2 = client.get_channel(1139256312488808488)
 	hellcord2 = client.get_channel(1274801731007545416)
-	assembly2 = client.get_channel(1303762689939607662)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs , ostracod , openbook , hellcord , assembly] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , ostracod2 , openbook2 , hellcord2 , assembly2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs , ostracod , openbook , hellcord] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , ostracod2 , openbook2 , hellcord2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	print('all channels gotten')
@@ -172,7 +178,6 @@ async def on_ready():
 		ostracod : 'ostracod conlangs',
 		openbook : 'open book',
 		hellcord : 'hellcord',
-		assembly : 'conlanging assembly',
 
 		mishserver2 : 'mishserver',
 		agonyserver2 : 'agonyserver',
@@ -183,7 +188,6 @@ async def on_ready():
 		ostracod2 : 'ostracod conlangs',
 		openbook2 : 'open book',
 		hellcord2 : 'hellcord',
-		assembly2 : 'conlanging assembly'
 	}
 
 	# put all the webhooks in a dict for faster retrieval
@@ -264,12 +268,14 @@ def prune_replies(content: str, length_limit: int) -> str:
 
 	lines_depths = [ ( line , find_depth(line) ) for line in content.split('\n') ]
 	max_depth = max([i[1] for i in lines_depths])
-	for current_depth in range(max_depth , 0 , -1): # goes from max_depth to *1*, not to 0, because uhhhhhhhhhhhhhhhhhhhhhhhh
-		if len( '\n'.join([i[0] for i in lines_depths]) ) < length_limit:
+
+	for current_depth in range(max_depth , 0 , -1):
+		if len( '\n'.join([i[0] for i in lines_depths]) ) < length_limit: # if message has now been collapsed to below length limit, stop collapsing and return
 			break
 		else:
+			print(current_depth, lines_depths[current_depth][0]) # debug
 			prune_position = next(index for index , i in enumerate(lines_depths) if i[1] == current_depth)
-			lines_depths = [ (line , depth) for (line , depth) in lines_depths if depth < current_depth ]
+			lines_depths = [ (line , depth) for (line , depth) in lines_depths if depth < current_depth ] # remove all lines from the array greater than the current depth
 			lines_depths.insert(prune_position , (f"{'> '*current_depth}{max_depth-current_depth+1} more replies" , current_depth) ) # this cannot be inserted at the end because it is part of the message's length
 	
 	return '\n'.join([i[0] for i in lines_depths])
@@ -294,6 +300,8 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 			reply_text = '`mishnet rules`'
 		if reply_text.replace('\n','') == serverdescs.replace('\n',''):
 			reply_text = '`mishnet server descriptions`'
+		if reply_text.replace('\n','') == explanation.replace('\n',''):
+			reply_text = '`mishnet explanation`'
 		
 		reply_text = re.sub(r"(?<!\]\()(?<!<)(https?:\/\/[^ \n]+)" , r"<\1>" , reply_text) # unembeds a link inside the quote block -- thank u taswelll for the help!
 		# future mish: thank you taswelll for fixing your own code when it broke!
