@@ -408,7 +408,7 @@ async def on_message(message: discord.Message):
 	# TODO: update to slash commands
 
 	# catch any poll messages
-	if isinstance(message, discord.Poll):
+	if message.poll:
 		return await message.channel.send("oopsie, looks like you tried to send a poll ! unfortunately, polls are not yet implemented into mishnet, so no one can see it. they'll be added soon tho, promise !!")
 
 	if message.content.startswith(prefix+'help') or message.content.startswith(prefix+'info'):
