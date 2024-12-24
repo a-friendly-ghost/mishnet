@@ -407,10 +407,6 @@ async def on_message(message: discord.Message):
 	# commands
 	# TODO: update to slash commands
 
-	# catch any poll messages
-	if message.poll:
-		return await message.channel.send("oopsie, looks like you tried to send a poll ! unfortunately, polls are not yet implemented into mishnet, so no one can see it. they'll be added soon tho, promise !!")
-
 	if message.content.startswith(prefix+'help') or message.content.startswith(prefix+'info'):
 		await message.channel.send(commands)
 	
@@ -508,6 +504,10 @@ async def on_message(message: discord.Message):
 	mishnet_channel = next( (channel_group for channel_group in mishnet_channels if message.channel in channel_group) , None ) # feeling like this would be another application for the associations data structure, but we made it only work for storing messages
 	if not mishnet_channel:
 		return
+	
+	# catch any poll messages
+	if message.poll:
+		return await message.channel.send("oopsie, looks like you tried to send a poll ! unfortunately, polls are not yet implemented into mishnet, so no one can see it. they'll be added soon tho, promise !!")
 
 	# typing indicator runs out immediately when message is sent
 	if message.author in users_typing[message.channel]:
