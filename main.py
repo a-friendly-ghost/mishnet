@@ -291,7 +291,7 @@ blackletter = '𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭�
 blackletterDict = {}
 for index, i in enumerate(alphabet):
 	blackletterDict[i] = blackletter[index]
-blackletterChance = 15
+blackletterChance = 20
 
 oldeningsBase = {
 	'really' : 'truly',
@@ -305,41 +305,37 @@ oldeningsBase = {
 	"im" : 'i am',
 	"i'm" : 'i am',
 	"it's" : "'tis",
+	"it isn'?t" : "'tis not",
 
-	'didnt' : 'did not',
-	'doesnt' : 'does not',
-	'wont' : 'will not',
-	"arent" : 'are not',
-	'isnt' : 'is not',
-	'should' : 'ought to',
-	'shouldnt' : 'ought not to',
-	'hasnt' : 'has not',
-	'havent' : 'have not',
-	'hadnt' : 'had not',
-	"couldnt" : 'could not',
-	"cant" : 'cannot',
+	"didn'?t" : 'did not',
+	"doesn'?t" : 'does not',
+	"won'?t" : 'will not',
+	"aren'?t" : 'are not',
+	"isn'?t" : 'is not',
+	"should" : 'ought to',
+	"shouldn'?t" : 'ought not to',
+	"hasn'?t" : 'has not',
+	"haven'?t" : 'have not',
+	"hadn'?t" : 'had not',
+	"couldn'?t" : 'could not',
+	"can'?t" : 'cannot',
 
-	'didn\'t' : 'did not',
-	'doesn\'t' : 'does not',
-	'won\'t' : 'will not',
-	"aren\'t" : 'are not',
-	'isn\'t' : 'is not',
-	'shouldn\'t' : 'ought not to',
-	'hasn\'t' : 'has not',
-	'haven\'t' : 'have not',
-	'hadn\'t' : 'had not',
-	"couldn\'t" : 'could not',
-	"can't" : 'cannot',
-
-	"won't" : 'shall not',
+	"won'?t" : 'shall not',
 	"'ll" : ' shall',
+	"'ve" : ' have',
+	"n't" : ' not',
 
 	'eggs' : 'eggs, or is it eyren?',
+	'mishnet' : 'the net of mish',
+	'maybe' : 'perchance',
 
-	'goodbye' : 'good day',
+	'goodbye' : 'good day to you',
 	'bye' : 'good day',
 	'hello' : 'greetings',
 	'hi' : 'greetings',
+	'hii' : 'salutations',
+	'hii+' : 'dearest salutations',
+	'hai' : 'good morrow',
 	
 	'oh my god' : 'gadzooks',
 	'holy shit' : 'egad',
@@ -354,11 +350,16 @@ oldeningsBase = {
 	'idk' : 'I know not',
 	'fsr' : 'for reasons unknown',
 	'iirc' : 'if my memory does serve me',
+	'ikr' : 'so it is',
 	'smth' : 'something',
 	'sth' : 'something',
+	'smn' : 'someone',
 	'wanna' : 'wish to',
+	'tho' : 'though I must confess',
+	'true' : 'veracity of the 9th degree',
 
 	'yes' : 'yea',
+	'yeah' : 'indeed',
 	'no' : 'nay',
 	'sorry' : 'I sincerely apologise my compatriot',
 	
@@ -369,9 +370,14 @@ oldeningsBase = {
 	'guys' : 'my compatriots',
 	'want' : 'wish',
 	'think' : 'believe',
+	'i thought' : 'i believed',
+	'ban' : 'smite',
+	'banned' : 'smote',
 	
     'meow' : 'feline vocalisation',
-	'mjau' : 'feline vocalisation of Swedish origin'
+	'mjau' : 'feline vocalisation of Swedish origin',
+	'meoww+' : 'extended feline vocalisation',
+	'mjauu+' : 'extended feline vocalisation of Swedish origin'
 }
 oldenings = dict(oldeningsBase, **{key.capitalize() : value.capitalize() for key, value in oldeningsBase.items()})
 	
@@ -385,7 +391,7 @@ def wordreplace(string, dict):
 		string = re.sub(regexString, dict[key], string)
 	return string
 def capitalise(text):
-	sentences = re.findall(r"([^\.?!]+[\.?!\s]?\s?)", text)
+	sentences = re.findall(r"([^\.?!']+[\.?!\s]?\s?)", text)
 	new = []
 	for sentence in sentences:
 		sentence = sentence[0].upper() + sentence[1:]
@@ -445,7 +451,8 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 	if content.startswith('> '): # separates reply quote blocks and quote blocks already in the message
 		to_send += '\n'
 
-	to_send += olden(content)
+	if len(content) != 0:
+		to_send += olden(content)
 
 	to_send += ' ' + ' '.join(sticker.url for sticker in stickers)
 
