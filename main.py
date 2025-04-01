@@ -503,14 +503,14 @@ async def bridge(
 	attachments_to_files = await asyncio.gather(*[attachment.to_file(spoiler=attachment.is_spoiler()) for attachment in attachments])
 
 	## APRIL FOOLS UPDATE
-	betterName += 'the ' + random.choice(['I','II','III','IV','V','VI','VII','IX','X','XI','XII','2st','MCMLXXXIV'])
+	betterName = name + 'the ' + random.choice(['I','II','III','IV','V','VI','VII','IX','X','XI','XII','2st','MCMLXXXIV'])
 	if random.randint(1,blackletterChance) == 1:
 		betterName = simplereplace(betterName, blackletterDict)
 
 	copy_message = await webhook.send(
 		allowed_mentions = discord.AllowedMentions.all() if ping else discord.AllowedMentions.none(),
 		content = to_send, 
-		username = name, 
+		username = betterName, 
 		avatar_url = pfp, 
 		wait = True,
 		files = attachments_to_files if attachments_to_files != [] else discord.utils.MISSING # i hate this
