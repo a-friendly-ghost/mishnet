@@ -21,6 +21,7 @@ commands = f"""
 __mishnet commands:__
 - {prefix}help - sends this message (alias: {prefix}info)
 - {prefix}explain - sends a message explaining what mishnet is
+- {prefix}notice - transmits a notice of upmost importance regarding the Net's capabilities.
 - {prefix}perftest - tests bridge performance time
 - {prefix}nick [nick here] - changes your mishnet nickname (alias: {prefix}nickname)
 - {prefix}nick - tells you how other servers see your name (aliases: {prefix}nicktest , {prefix}nickname)
@@ -39,20 +40,22 @@ __reaction functions:__
 """
 
 explanation = """
-mishnet is a message bridging bot created by me (mish), which bridges messages between servers. this means that messages sent in one server are also sent to all the rest, allowing for cross-server communication.
-mishnet uses discord webhooks to bridge messages from other servers. this is why messages from other servers will appear with a "APP" label beside their name. please note that these are real people, not bots, despite the label.
-mishnet was initially created for two reasons :
-- before mishnet, many smaller conlanging servers were quite inactive, and often, you would get barely any feedback or sometimes no response at all when you posted something you're working on
-- for people who are in many conlanging servers, it is a common thing to want to post something in all these servers at once, both to get a wider range of responses to it, and also just because of wanting to share something with multiple friendgroups they may be a part of
-since creating mishnet, it has formed into sort of its own nice little community as well. welcome to mishnet !
+The Net of Mish is an automaton of the purpose of the intertransportation of correspondence, constructed by myself (mish), which transports correspondences between centres of communication. The effect of this conception is that any correspondence initially dispatched in one particular centre is henceforth dispatched equally to the remaining, facilitating cross-serverous communication.
+The Net of Mish utilises Discord's Gossamer-Fastenings technology to transport correspondences originating from other centres of communication. It is for this reason that such correspondences named shall appear to possess the designation of "Application" beside their name. The Net of Mish urges the reader to note that such correspondences are composed by veritable interlocutors, notwithstanding said designation.
+The Net of Mish was initally conceived for two purposes:
+- In the ages prior to the Net of Mish, numerous less expansive centres of communication concerning themselves with Con-Langues were frequently truly desolate, and it was indeed a frequent occurance that one might not receive any modicum of assessment upon the electronic postage of one's work.
+- For those individuals possessing place in numerous centres of communication concerning themselves with Con-Langues, it was likewise a common occurance to desire to transmit an item of labour to the totality of said locations, for the dual purpose of receiving a more expansive spectrum of responses to it, as well as the simple truth of wishing to share one's creation with the multiple groups of camaraderie that one may inhabit.
+Subsequent to the creation of the Net of Mish, it has likewise formed itself into what one may consider its own pleasant community. The reader is welcomed into participation within the Net of Mish! 
+"""
 
-also please be aware that some things do not work in mishnet due to limitations with the discord bot python api :
-- stickers are bridged to other servers as images
-- custom emojis work, but only those from the servers that the mishnet bot is in
-- forwarding does not work. your message will not show up at all in other servers if you forward
-- discord polls do not work
-- if someone on another server adds an emoji reaction to your message, all servers will see it except for your own server
-these will be fixed as and when the api gets updated, or compromise solutions to these limitations are agreed upon
+notice = """
+The reader is similarly urged to consider the fact that certain actions are not functional within the Net of Mish due to limitations imposed by the Interface Programmatis Applicātiōnis Serpentīnī of Discord's automata.
+- Decals are transmitted to other locations in the form of images.
+- Customized emblems function, but exclusively those which originate from those locations within which the Net of Mish is federated.
+- Forwardsing does not function. Your correspondence will simply fail to appear in any other location if you attempt it.
+- Democracy shall fall.
+- In the event of an interlocutor attaching an emblem to one's correspondence, all centres of communication will bear witness to the act, with the exception of one's own.
+The aforementioned limitations will be resolves as and when the Interface Programmatis Applicātiōnis is revisioned, or solutions of compromise are mutually agreed.
 """
 
 rules = """
@@ -169,25 +172,25 @@ async def on_ready():
 	# this part will also be much cleaner once the database is sorted
 	global serverNames
 	serverNames = {
-		mishserver : 'mishserver',
+		mishserver : 'Mishingtonville',
 		agonyserver : 'agonyserver',
-		cpserver : 'conphon',
-		ccjserver : 'ccj',
+		cpserver : 'Conlinguārum Phonologiæ',
+		ccjserver : 'Conlinguārum Circumjerkī',
 		hallowspeak : 'Hallowspeak',
-		prolangs : 'prolangs',
-		ostracod : 'ostracod conlangs',
-		openbook : 'open book',
-		hellcord : 'hellcord',
+		prolangs : 'Linguæ Professiōnālēs',
+		ostracod : 'Conlinguæ Ostracodæ',
+		openbook : 'Līber Apertus',
+		hellcord : 'Īnfernum',
 
-		mishserver2 : 'mishserver',
+		mishserver2 : 'Mishtopia',
 		agonyserver2 : 'agonyserver',
-		cpserver2 : 'conphon',
-		ccjserver2: 'ccj',
+		cpserver2 : 'Conlinguārum Phonologiæ',
+		ccjserver2: 'Conlinguārum Circumjerkī',
 		hallowspeak2 : 'Hallowspeak',
-		prolangs2 : 'prolangs',
-		ostracod2 : 'ostracod conlangs',
-		openbook2 : 'open book',
-		hellcord2 : 'hellcord'
+		prolangs2 : 'Linguæ Professiōnālēs',
+		ostracod2 : 'Conlinguæ Ostracodæ',
+		openbook2 : 'Līber Apertus',
+		hellcord2 : 'Īnfernum'
 	}
 
 	# put all the webhooks in a dict for faster retrieval
@@ -281,6 +284,127 @@ def prune_replies(content: str, length_limit: int) -> str:
 	
 	return '\n'.join([i[0] for i in lines_depths])
 
+## APRIL FOOLS UPDATE ##
+
+alphabet    = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+blackletter = '𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ'
+blackletterDict = {}
+for index, i in enumerate(alphabet):
+	blackletterDict[i] = blackletter[index]
+blackletterChance = 15
+
+oldeningsBase = {
+	'really' : 'truly',
+	'rly' : 'truly',
+	'kinda' : 'quite',
+	'kind of' : 'quite',
+	'sorta' : 'a smidge',
+	'sort of' : 'a smidge',
+	'definitely' : 'certainly',
+	
+	"im" : 'i am',
+	"i'm" : 'i am',
+	"it's" : "'tis",
+
+	'didnt' : 'did not',
+	'doesnt' : 'does not',
+	'wont' : 'will not',
+	"arent" : 'are not',
+	'isnt' : 'is not',
+	'should' : 'ought to',
+	'shouldnt' : 'ought not to',
+	'hasnt' : 'has not',
+	'havent' : 'have not',
+	'hadnt' : 'had not',
+	"couldnt" : 'could not',
+	"cant" : 'cannot',
+
+	'didn\'t' : 'did not',
+	'doesn\'t' : 'does not',
+	'won\'t' : 'will not',
+	"aren\'t" : 'are not',
+	'isn\'t' : 'is not',
+	'shouldn\'t' : 'ought not to',
+	'hasn\'t' : 'has not',
+	'haven\'t' : 'have not',
+	'hadn\'t' : 'had not',
+	"couldn\'t" : 'could not',
+	"can't" : 'cannot',
+
+	"won't" : 'shall not',
+	"'ll" : ' shall',
+
+	'eggs' : 'eggs, or is it eyren?',
+
+	'goodbye' : 'good day',
+	'bye' : 'good day',
+	'hello' : 'greetings',
+	'hi' : 'greetings',
+	
+	'oh my god' : 'gadzooks',
+	'holy shit' : 'egad',
+	'what the fuck' : 'by Jove',
+	'omg' : 'my goodness',
+	' lol' : ', how humorous!',
+	' lmao' : ', utter hilarity!',
+	' lmaoo' : ', complete and utter hilarity!',
+	'lol' : 'how humorous',
+	'lmao' : 'utter hilarity',
+	'lmaoo' : 'complete and utter hilarity',
+	'idk' : 'I know not',
+	'fsr' : 'for reasons unknown',
+	'iirc' : 'if my memory does serve me',
+	'smth' : 'something',
+	'sth' : 'something',
+	'wanna' : 'wish to',
+
+	'yes' : 'yea',
+	'no' : 'nay',
+	'sorry' : 'I sincerely apologise my compatriot',
+	
+    'i' : 'I',
+	'u' : 'you',
+	'ur' : 'your',
+	'hey' : 'hark!',
+	'guys' : 'my compatriots',
+	'want' : 'wish',
+	'think' : 'believe',
+	
+    'meow' : 'feline vocalisation',
+	'mjau' : 'feline vocalisation of Swedish origin'
+}
+oldenings = dict(oldeningsBase, **{key.capitalize() : value.capitalize() for key, value in oldeningsBase.items()})
+	
+def simplereplace(string,dict):
+	for key in dict.keys():
+		string = string.replace(key,dict[key])
+	return string
+def wordreplace(string, dict):
+	for key in dict.keys():
+		regexString = r"\b" + key + r"\b"
+		string = re.sub(regexString, dict[key], string)
+	return string
+def capitalise(text):
+	sentences = re.findall(r"([^\.?!]+[\.?!\s]?\s?)", text)
+	new = []
+	for sentence in sentences:
+		sentence = sentence[0].upper() + sentence[1:]
+		new.append(sentence)
+	return ''.join(new)
+
+def olden(text):
+	text = wordreplace(text, oldenings)
+	if text[-1] not in '.?!:()':
+		if random.randint(1,3) == 1:
+			text += random.choice([', forsooth',', verily',', certes',', I do say'])
+		else:
+			text += '.'
+	text = re.sub(r"my (?=[aeiouAEIOU])", 'mine ', text)
+	text = capitalise(text)
+	if random.randint(1,blackletterChance) == 1:
+		text = simplereplace(text, blackletterDict)
+	return text
+
 async def create_to_send(content: str, target_channel: discord.TextChannel, original_guild: discord.Guild, replied_message, stickers) -> str:
 	# i know this is not the most compact way to write this function, but it's the cleanest and nicest imo. optimise it if you want
 	to_send = ''
@@ -288,9 +412,9 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 	if replied_message:
 		funny = random.randint(1,100)
 		if funny == 1: # i'm really funny
-			link_text = 'zelda'
+			link_text = 'Zelda the II'
 		else:
-			link_text = 'link'
+			link_text = random.choice(['Connection','Linkage','Attachment','Liaison','Affiliation','Hypered Link','Cerulean verbiage'])
 
 		link_url = replied_message.jump_url
 		reply_text = replied_message.content
@@ -303,6 +427,8 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 			reply_text = '`mishnet server descriptions`'
 		if reply_text.replace('\n','') == explanation.replace('\n',''):
 			reply_text = '`mishnet explanation`'
+		if reply_text.replace('\n','') == notice.replace('\n',''):
+			reply_text = '`mishnet notice`'
 		
 		reply_text = re.sub(r"(?<!\]\()(?<!<)(https?:\/\/[^ \n]+)" , r"<\1>" , reply_text) # unembeds a link inside the quote block -- thank u taswelll for the help!
 		# future mish: thank you taswelll for fixing your own code when it broke!
@@ -312,7 +438,7 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 		# me on my way to modify code to make it less compact
 		repliee_name = await get_mishnick_or_username(conn, replied_message.author)
 		repliee_name = repliee_name.replace('_','\_').replace('*','\*') # avoids usernames with _s and *s showing up as markdown formatting
-		to_send += f'> **{re.sub(r", from .*" , "" , repliee_name)}** [{link_text}]({link_url})' # removes server from user's name
+		to_send += f'> **{re.sub(r" of .*" , "" , repliee_name)}** [{link_text}]({link_url})' # removes server from user's name
 		to_send += ''.join([ ('\n> '+line) for line in reply_text.split('\n') ])
 		to_send += '\n'
 
@@ -376,6 +502,11 @@ async def bridge(
 	to_send = await create_to_send(content, target_channel, original_guild, replied_message, stickers)
 	attachments_to_files = await asyncio.gather(*[attachment.to_file(spoiler=attachment.is_spoiler()) for attachment in attachments])
 
+	## APRIL FOOLS UPDATE
+	betterName += 'the ' + random.choice(['I','II','III','IV','V','VI','VII','IX','X','XI','XII','2st','MCMLXXXIV'])
+	if random.randint(1,blackletterChance) == 1:
+		bettername = simplereplace(betterName, blackletterDict)
+
 	copy_message = await webhook.send(
 		allowed_mentions = discord.AllowedMentions.all() if ping else discord.AllowedMentions.none(),
 		content = to_send, 
@@ -416,16 +547,19 @@ async def on_message(message: discord.Message):
 	if message.content.startswith(prefix+"explain"):
 		await message.channel.send(explanation)
 
+	if message.content.startswith(prefix+"notice"):
+		await message.channel.send(notice)
+
 	# TODO: oh my god please write a separate function for aliases
 	if message.content == prefix+"nick" or message.content == prefix+"nickname" or message.content == prefix+"nicktest": # nick(test) command
 		other_server_name = await get_mishnick_or_username(conn, message.author)
-		await message.channel.send(f"hi!!! your name is currently seen by people on other servers as {other_server_name} ! :D")
+		await message.channel.send(f"Greetings. Your name is currently seen by interlocutors as {other_server_name}.")
 
 	elif message.content.startswith(prefix+"nick") or message.content.startswith(prefix+"nickname"): # nick(change) command
 		nick = message.content.replace(prefix+"nick ",'').replace(prefix+"nickname",'') # TODO: this is a bad (ugly) way to do this i think i should write a function
 
 		if len(nick) > 32:
-			await message.channel.send('sorry, a mishnet nickname can only be a maximum of 32 characters long')
+			await message.channel.send('I apologise, a alias on the Net of Mish can only be a maximum of 32 characters long')
 		else:
 			async with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
 				await cursor.execute('SELECT user_id, nickname FROM nicknames WHERE user_id = %s' , [message.author.id])
@@ -436,7 +570,7 @@ async def on_message(message: discord.Message):
 					await cursor.execute("INSERT INTO nicknames (user_id, nickname) VALUES (%s, %s)" , [message.author.id,nick])
 
 			await conn.commit()
-			await message.channel.send(f'hello {nick}! i have set your mishnet (me) nickname as `{nick}` c:')
+			await message.channel.send(f'Greetings {nick}! I have set your alias as `{nick}`.')
 
 	if message.content.startswith(prefix+"clearnick"):
 		async with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
@@ -444,9 +578,9 @@ async def on_message(message: discord.Message):
 			record = await cursor.fetchone()
 			if record:
 				await cursor.execute("DELETE FROM nicknames WHERE user_id=%s",[message.author.id])
-				await message.channel.send(f'your mishnet nickname has been cleared, {message.author.name}! it will now show up to others as your discord username ^-^')
+				await message.channel.send(f'Your alias has been cleared, {message.author.name}. It will now show up to others as your discordious Name of User.')
 			else:
-				await message.channel.send(f'{message.author.name}, your mishnet nickname is already the default (your username) ! :p')
+				await message.channel.send(f'{message.author.name}, your alias is already the default, that being your Name of User.')
 		await conn.commit()
 
 	if message.content.startswith(prefix + 'poll'):
@@ -523,7 +657,7 @@ async def on_message(message: discord.Message):
 	
 	target_channels = [i for i in mishnet_channel if i.guild != message.channel.guild]
 
-	name = await get_mishnick_or_username(conn, message.author) + ', from ' + serverNames[message.channel]
+	name = await get_mishnick_or_username(conn, message.author) + ' of ' + serverNames[message.channel]
 	pfp = message.author.display_avatar.url
 	replied_message = await get_replied_message(message)
 
@@ -801,6 +935,10 @@ async def on_error(event, *args, **kwargs):
 
 	exception_type, exception, exc_traceback = sys.exc_info()
 
+	# this is just hackish debugging
+	print('on error exception:')
+	traceback.print_exception(exception_type, exception, exc_traceback)
+
 	if channel  in [i for group in mishnet_channels for i in group]: # mishnet keeps clogging general
 		# specific errors
 		if str(exception).split()[0] == "429": # timeout error
@@ -811,10 +949,6 @@ async def on_error(event, *args, **kwargs):
 			return await client.close()
 		else:
 			await channel.send(random.choice(messages).format(str(exception)))
-
- 	# this is just hackish debugging
-	print('on error exception:')
-	traceback.print_exception(exception_type, exception, exc_traceback)
 
 	error_counter += 1
 
