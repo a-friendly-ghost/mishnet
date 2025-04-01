@@ -656,7 +656,7 @@ async def on_message(message: discord.Message):
 	
 	target_channels = [i for i in mishnet_channel if i.guild != message.channel.guild]
 
-	name = await get_mishnick_or_username(conn, message.author) + 'the ' + random.choice(['I','II','III','IV','V','VI','VII','IX','X','XI','XII','2st','MCMLXXXIV']) + ' of ' + serverNames[message.channel]
+	name = await get_mishnick_or_username(conn, message.author) + ' the ' + random.choice(['I','II','III','IV','V','VI','VII','IX','X','XI','XII','2st','MCMLXXXIV']) + ' of ' + serverNames[message.channel]
 	pfp = message.author.display_avatar.url
 	replied_message = await get_replied_message(message)
 
