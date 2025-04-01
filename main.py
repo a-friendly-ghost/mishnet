@@ -505,7 +505,7 @@ async def bridge(
 	## APRIL FOOLS UPDATE
 	betterName += 'the ' + random.choice(['I','II','III','IV','V','VI','VII','IX','X','XI','XII','2st','MCMLXXXIV'])
 	if random.randint(1,blackletterChance) == 1:
-		bettername = simplereplace(betterName, blackletterDict)
+		betterName = simplereplace(betterName, blackletterDict)
 
 	copy_message = await webhook.send(
 		allowed_mentions = discord.AllowedMentions.all() if ping else discord.AllowedMentions.none(),
