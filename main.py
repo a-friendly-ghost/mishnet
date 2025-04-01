@@ -240,6 +240,11 @@ async def on_ready():
 	loop = asyncio.get_event_loop()
 	loop.create_task(reset_error_counter())
 
+	for guild in client.guilds:
+		print(guild)
+		clientMember = await guild.fetch_member(client.id)
+		await clientMember.edit(nick='The Net of Mish')
+
 	global ready
 	ready = True
 	print('on ready end')
