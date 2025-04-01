@@ -445,7 +445,7 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 	if content.startswith('> '): # separates reply quote blocks and quote blocks already in the message
 		to_send += '\n'
 
-	to_send += content
+	to_send += olden(content)
 
 	to_send += ' ' + ' '.join(sticker.url for sticker in stickers)
 
@@ -503,14 +503,13 @@ async def bridge(
 	attachments_to_files = await asyncio.gather(*[attachment.to_file(spoiler=attachment.is_spoiler()) for attachment in attachments])
 
 	## APRIL FOOLS UPDATE
-	betterName = name + 'the ' + random.choice(['I','II','III','IV','V','VI','VII','IX','X','XI','XII','2st','MCMLXXXIV'])
 	if random.randint(1,blackletterChance) == 1:
-		betterName = simplereplace(betterName, blackletterDict)
+		name = simplereplace(name, blackletterDict)
 
 	copy_message = await webhook.send(
 		allowed_mentions = discord.AllowedMentions.all() if ping else discord.AllowedMentions.none(),
 		content = to_send, 
-		username = betterName, 
+		username = name, 
 		avatar_url = pfp, 
 		wait = True,
 		files = attachments_to_files if attachments_to_files != [] else discord.utils.MISSING # i hate this
@@ -657,7 +656,7 @@ async def on_message(message: discord.Message):
 	
 	target_channels = [i for i in mishnet_channel if i.guild != message.channel.guild]
 
-	name = await get_mishnick_or_username(conn, message.author) + ' of ' + serverNames[message.channel]
+	name = await get_mishnick_or_username(conn, message.author) + 'the ' + random.choice(['I','II','III','IV','V','VI','VII','IX','X','XI','XII','2st','MCMLXXXIV']) + ' of ' + serverNames[message.channel]
 	pfp = message.author.display_avatar.url
 	replied_message = await get_replied_message(message)
 
