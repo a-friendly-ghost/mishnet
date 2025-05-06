@@ -27,6 +27,7 @@ __mishnet commands:__
 - {prefix}clearnick - resets your mishnet nickname to use your username
 - (deprecated) {prefix}poll [optional text] - creates a poll message
 - {prefix}rules - sends the rules of mishnet
+- {prefix}guidelines - sends the mishnet guidelines (two messages)
 - {prefix}servers - sends a description of each server connected to mishnet
 - (deprecated) {prefix}telephone - sends a jump link to the latest telephone game entry
 - (deprecated) {prefix}telephoneprefix - tells you the prefix used to mark telephone messages (alias: {prefix}tpprefix)
@@ -77,6 +78,29 @@ this is a list of every connected server along with a brief description of them
 - ostracod - the server about the conlangs and other projects made by ostracod, creator of vötgil among others
 - open book - a server focused around the idea that conlanging and worldbuilding is an artform like any other, created by creativitytheemotion
 - hellcord - a friends server owned by baphomet
+"""
+
+guidelines1 = """
+- other people on mishnet are strangers 
+  - mishnet is a public space, and at any point some of the people you are talking to will be strangers ! please behave accordingly respecting this fact
+  - not all people know you or anything about you ! that means :
+    - try not to say things that require people to know some information about yourself to understand. relying on other people to know some information about yourself in order to understand something you said is not appropriate for mishnet
+    - communication specific to you and your friendgroup will probably not be appropriate for mishnet. as a completely made-up example :  i might be able to just say "meow" to my friends and have them perfectly understand what i'm trying to express, but doing so in mishnet would be not be recommended
+- mishnet is not your personal blog channel
+  - mishnet is for sharing things with the other people connected. that means not just stuff that you like, but stuff you also expect other people to like. there is of course nothing wrong with just sharing things you like, but in any server, that would go in your own personal channel rather than general or conlanging. mishnet is just the same as any other general or conlanging channels in this regard
+- mishnet is not a channel of your server
+  - even if your server is a private server, mishnet is always treated as a public server. when you are in mishnet, please behave accordingly as if you are in a public conlanging server, regardless of whether or not your own server is one or not
+- meta discussion
+"""
+guidelines2 = """
+- mods in mishnet have discretion
+  - the mods in mishnet have the discretion to judge whether your actions are in line with mishnet's rules and guidelines or not. even if you don't do something against the literal word of what is written, you may still receive a violation if you are obviously doing something wrong
+- specifically, this guideline is referring to suggestions, issues and other feedback on mishnet. i would ask that you refrain from bringing your ideas up in the mishnet channels, for no other reason than it can cause clutter and slow down the channels. if you have an idea, i would still love to hear it ! but i would ask you dm it to me directly, and i will bring it up in mishnet if i think it has promise
+- mishnet is not reliable
+  - while of course i do my best to make mishnet reliable and functional, i am just one person, and the reliability of mishnet is not anywhere on par with professional chat services. i of course apologise for any bugs or issues that occur with the mishnet bot, but i also urge that you do not come to expect mishnet to be reliable and then get upset when it is not
+
+infringing guidelines will result in a mishnet warn the same way as breaking rules, but the first time you do it you will just be informed that you made a mistake, and not recieve one out of three warns
+breaking these guidelines prior to their formalisation also count, so if you have infringed one of these in the past, you will receive a warm immediately if you do so again anyway
 """
 
 mishnet_channels = None
@@ -303,6 +327,10 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 			reply_text = '`mishnet server descriptions`'
 		if reply_text.replace('\n','') == explanation.replace('\n',''):
 			reply_text = '`mishnet explanation`'
+		if reply_text.replace('\n','') == guidelines1.replace('\n',''):
+			reply_text = '`mishnet guidelines part 1`'
+		if reply_text.replace('\n','') == guidelines2.replace('\n',''):
+			reply_text = '`mishnet guidelines part 2`'
 		
 		reply_text = re.sub(r"(?<!\]\()(?<!<)(https?:\/\/[^ \n]+)" , r"<\1>" , reply_text) # unembeds a link inside the quote block -- thank u taswelll for the help!
 		# future mish: thank you taswelll for fixing your own code when it broke!
@@ -311,7 +339,7 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 
 		# me on my way to modify code to make it less compact
 		repliee_name = await get_mishnick_or_username(conn, replied_message.author)
-		repliee_name = repliee_name.replace('_','\_').replace('*','\*') # avoids usernames with _s and *s showing up as markdown formatting
+		repliee_name = repliee_name.replace('\\','\\\\').replace('_','\_').replace('*','\*') # avoids usernames with _s and *s showing up as markdown formatting
 		to_send += f'> **{re.sub(r", from .*" , "" , repliee_name)}** [{link_text}]({link_url})' # removes server from user's name
 		to_send += ''.join([ ('\n> '+line) for line in reply_text.split('\n') ])
 		to_send += '\n'
@@ -457,6 +485,11 @@ async def on_message(message: discord.Message):
 
 	if message.content == prefix + 'servers':
 		await message.channel.send(serverdescs)
+
+	if message.content == prefix + 'guidelines':
+		await message.channel.send(guidelines1)
+		await asyncio.sleep(1)
+		await message.channel.send(guidelines2)
 
 	if message.content.startswith(prefix+'shutthefuckup '):
 		if message.author.guild_permissions.kick_members:
