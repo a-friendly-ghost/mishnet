@@ -63,6 +63,7 @@ the mishnet rules are a combination of the rules of mishnet's connected servers,
 - respect your fellow mishnet users, including their wishes regarding not seeing particular things, words, or topics
 - no explicit or shocking images or videos
 - if you see someone breaking these rules or doing something you consider wrong, mishnet strongly recommends that you please ping me personally, rather than responding to the individual. if i am not online, ping one of the mods of the server you are in
+- also, please do not use other bots in mishnet, as some bots can cause mishnet to crash. this issue is currently being looked into, but for the time being, please refrain from doing so. exceptions to this are pluralkit and tupperbox, which mishnet has special support for
 breaking a rule will result in recieving a warn; three warns will result in being banned from mishnet
 please remember that given the wide range of mishnet, not all members may be familiar with what makes you uncomfortable, even if it seems obvious from your perspective
 """
@@ -90,17 +91,17 @@ guidelines1 = """
   - mishnet is for sharing things with the other people connected. that means not just stuff that you like, but stuff you also expect other people to like. there is of course nothing wrong with just sharing things you like, but in any server, that would go in your own personal channel rather than general or conlanging. mishnet is just the same as any other general or conlanging channels in this regard
 - mishnet is not a channel of your server
   - even if your server is a private server, mishnet is always treated as a public server. when you are in mishnet, please behave accordingly as if you are in a public conlanging server, regardless of whether or not your own server is one or not
-- meta discussion
 """
 guidelines2 = """
+- meta discussion
+  - specifically, this guideline is referring to suggestions, issues and other feedback on mishnet. i would ask that you refrain from bringing your ideas up in the mishnet channels, for no other reason than it can cause clutter and slow down the channels. if you have an idea, i would still love to hear it ! but i would ask you dm it to me directly, and i will bring it up in mishnet if i think it has promise
 - mods in mishnet have discretion
   - the mods in mishnet have the discretion to judge whether your actions are in line with mishnet's rules and guidelines or not. even if you don't do something against the literal word of what is written, you may still receive a violation if you are obviously doing something wrong
-- specifically, this guideline is referring to suggestions, issues and other feedback on mishnet. i would ask that you refrain from bringing your ideas up in the mishnet channels, for no other reason than it can cause clutter and slow down the channels. if you have an idea, i would still love to hear it ! but i would ask you dm it to me directly, and i will bring it up in mishnet if i think it has promise
 - mishnet is not reliable
   - while of course i do my best to make mishnet reliable and functional, i am just one person, and the reliability of mishnet is not anywhere on par with professional chat services. i of course apologise for any bugs or issues that occur with the mishnet bot, but i also urge that you do not come to expect mishnet to be reliable and then get upset when it is not
 
 infringing guidelines will result in a mishnet warn the same way as breaking rules, but the first time you do it you will just be informed that you made a mistake, and not recieve one out of three warns
-breaking these guidelines prior to their formalisation also count, so if you have infringed one of these in the past, you will receive a warm immediately if you do so again anyway
+breaking these guidelines prior to their formalisation also count, so if you have infringed one of these in the past, you will receive a warn immediately if you do so again anyway
 """
 
 mishnet_channels = None
