@@ -749,8 +749,7 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 	# handle bridged duplicates
 	await update_reactions(original_message)
 	# handle original, user-sent message
-	if reaction.emoji not in [react.emoji for react in original_message.reactions]:
-		await original_message.add_reaction(reaction.emoji)
+	await original_message.add_reaction(reaction.emoji)
 
 	return
 
