@@ -659,6 +659,15 @@ async def alter_poll(original_message: discord.Message , reaction: discord.React
 	return # idk why this is here instead of above
 
 async def update_reactions(message: discord.Message):
+	# adding reactions to the original, user-sent message is handled within the on_reaction_add() event
+	# this is because to do it inside this function, you would have to loop over all the reacts it should have to find the one it doesn't yet
+
+	# removing reactions from the original, user-sent message *is* handled within this function though
+	# this is because mishnet should only remove a reaction from an original message when *no* server has that reaction to that message
+	# this function already gathers the reactions from all servers, so it saves us having to do it twice
+
+	# the view has to be rebuilt each time, since like, u can't increment/decrement the text in a view's labels.
+
 	all_messages = await asyncio.gather(*[partial.fetch() for partial in associations.get_duplicates_of(message)]) + [message]
 	# re-count all reacts to a message across servers
 	all_reactions = {} # dict of {emoji : count}
@@ -678,15 +687,12 @@ async def update_reactions(message: discord.Message):
 	view = SuperCoolReactionView(all_reactions)
 	messages_to_edit = associations.retrieve_others(message)
 	# add view "reactions" to all the bridged messages
-	return await asyncio.gather(*[message.edit(view=view) for message in messages_to_edit])
+	await asyncio.gather(*[message.edit(view=view) for message in messages_to_edit])
 
-	# adding reactions to the original, user-sent message is handled within the on_reaction_add() and on_reaction_remove() events
-	# this is because to do it inside this function, you would have to loop over all the reacts it should have to find the one it doesn't yet,
-	# and then loop over all the reacts it does have, to find the one that it should remove.
-
-	# the view has to be rebuilt each time, since like, u can't increment/decrement the text in a view's labels.
-	# but u *can* just add or remove actual reactions so like, yea, do that
-
+	# check if any reactions from mishnet on original messages need to be removed
+	for react in message.reactions:
+		if react.emoji not in all_reactions.keys():
+			await message.clear_reaction(react)
 
 @client.event
 async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Member, discord.User]):
@@ -775,12 +781,7 @@ async def on_reaction_remove(reaction: discord.Reaction, member: Union[discord.M
 		return
 	
 	# handle bridged duplicates
-	await update_reactions(original_message)
-	# handle original, user-sent message
-	if reaction.emoji in [react.emoji for react in original_message.reactions]:
-		await original_message.clear_reaction(reaction.emoji)
-
-	return
+	return await update_reactions(original_message)
 
 @client.event
 async def on_message_edit(before , after):
