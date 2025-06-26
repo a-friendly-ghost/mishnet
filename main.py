@@ -50,9 +50,9 @@ since creating mishnet, it has formed into sort of its own nice little community
 also please be aware that some things do not work in mishnet due to limitations with the discord bot python api :
 - stickers are bridged to other servers as images
 - custom emojis work, but only those from the servers that the mishnet bot is in
-- forwarding does not work. your message will not show up at all in other servers if you forward
+- forwarding does not work. your message will not show up *at all* in other servers if you forward
 - discord polls do not work
-- if someone on another server adds an emoji reaction to your message, all servers will see it except for your own server
+- if someone on another server adds an emoji reaction to your message, all other servers will get to see the reaction, and how many of them there are. you however, will only be able to see the reaction, because mishnet cannot add the same reaction to a message multiple times
 these will be fixed as and when the api gets updated, or compromise solutions to these limitations are agreed upon
 """
 
