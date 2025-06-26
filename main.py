@@ -665,6 +665,7 @@ async def update_reactions(message: discord.Message):
 	for message in all_messages:
 		for react in message.reactions:
 			if react.me: # is this really what you named this attribute, discord.py devs ?
+				print('test asdfghjkl')
 				continue # don't count your own reactions, mishnet !! 
 			if react.emoji in all_reactions.keys():
 				old_count = all_reactions[react.emoji]
