@@ -32,8 +32,10 @@ class MessageAssociations:
     
     def retrieve_others(self, original_or_duplicate_message: PartialMessage):
         if original_or_duplicate_message in self._internal.keys():
+            # the message passed in to the function was an original message
             return self.get_duplicates_of(original_or_duplicate_message)
         else:
+            # the message passed in to the function was a bridged message
             for original, duplicates in self._internal.items():
                 if original_or_duplicate_message in duplicates:
                     return [partial_message for partial_message in duplicates if partial_message.id != original_or_duplicate_message.id] + [original]
@@ -45,6 +47,7 @@ class MessageAssociations:
         for original, duplicates in self._internal.items():
             if original == original_or_duplicate or original_or_duplicate in duplicates:
                 return original
+        raise KeyError
 
     def __contains__(self, original_message: PartialMessage):
         return self._internal.__contains__(original_message)

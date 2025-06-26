@@ -298,7 +298,6 @@ def prune_replies(content: str, length_limit: int) -> str:
 		if len( '\n'.join([i[0] for i in lines_depths]) ) < length_limit: # if message has now been collapsed to below length limit, stop collapsing and return
 			break
 		else:
-			print(current_depth, lines_depths[current_depth][0]) # debug
 			prune_position = next(index for index , i in enumerate(lines_depths) if i[1] == current_depth)
 			lines_depths = [ (line , depth) for (line , depth) in lines_depths if depth <= current_depth ] # remove all lines from the array greater than the current depth
 			numberMoreReplies = max_depth-current_depth+1
@@ -661,6 +660,7 @@ async def alter_poll(original_message: discord.Message , reaction: discord.React
 
 async def update_reactions(message: discord.Message):
 	all_messages = await asyncio.gather(*[partial.fetch() for partial in associations.get_duplicates_of(message)]) + [message]
+	# re-count all reacts to a message across servers
 	all_reactions = {}
 	for message in all_messages:
 		for react in message.reactions:
@@ -670,9 +670,19 @@ async def update_reactions(message: discord.Message):
 			else:
 				all_reactions[react.emoji] = react.count 
 
+	# construct new view to replace old one
 	view = SuperCoolReactionView(all_reactions)
 	messages_to_edit = associations.retrieve_others(message)
+	# add view "reactions" to all the bridged messages
 	return await asyncio.gather(*[message.edit(view=view) for message in messages_to_edit])
+
+	# adding reactions to the original, user-sent message is handled within the on_reaction_add() and on_reaction_remove() events
+	# this is because to do it inside this function, you would have to loop over all the reacts it should have to find the one it doesn't yet,
+	# and then loop over all the reacts it does have, to find the one that it should remove.
+
+	# the view has to be rebuilt each time, since like, u can't increment/decrement the text in a view's labels.
+	# but u *can* just add or remove actual reactions so like, yea, do that
+
 
 @client.event
 async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Member, discord.User]):
@@ -682,16 +692,23 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 
 	global poll_lock
 
+	# leave immediately if not in mishnet channel
 	if reaction.message.channel not in [channel for group in mishnet_channels for channel in group]:
 		return
 	
-	partial_message = reaction.message.channel.get_partial_message(reaction.message.id) # converts to partial message
+	# leave immediately if react is from mishnet herself
+	if member.id == client.user.id:
+		return
+	
+	partial_message = reaction.message.channel.get_partial_message(reaction.message.id) # converts reacted message to partial message
 	original_message = await associations.to_original(partial_message).fetch()
 
+	# for poll messages (deprecated kinda)
 	if original_message.author.id == client.user.id and reaction.message.content.startswith(poll_start):
 		await alter_poll(original_message , reaction , 1)
 		return
 
+	# special functionality for :x: react
 	if reaction.emoji == "❌":
 
 		if original_message.author.id != member.id: # message.author is a User, so i compare ids
@@ -700,6 +717,7 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 
 		return await reaction.message.delete()
 	
+	# special functionality for :bell: react
 	if reaction.emoji == "🔔":
 	
 		name = await get_mishnick_or_username(conn, member) + ', from ' + serverNames[reaction.message.channel]
@@ -724,24 +742,42 @@ async def on_reaction_add(reaction: discord.Reaction, member: Union[discord.Memb
 		duplicates = [i for i in messages if i.channel != reaction.message.channel]
 		associations.set_duplicates(main, duplicates)
 
-	return await update_reactions(original_message)
+	# handle bridged duplicates
+	await update_reactions(original_message)
+	# handle original, user-sent message
+	if reaction.emoji not in [react.emoji for react in original_message.reactions]:
+		await original_message.add_reaction(reaction.emoji)
+
+	return
 
 @client.event
 async def on_reaction_remove(reaction: discord.Reaction, member: Union[discord.Member, discord.User]):
 
 	global poll_lock
 
+	# leave immediately if not in mishnet channel
 	if reaction.message.channel not in [channel for group in mishnet_channels for channel in group]:
+		return
+	
+	# leave immediately if dereact is from mishnet herself
+	if member.id == client.user.id:
 		return
 	
 	partial_message = reaction.message.channel.get_partial_message(reaction.message.id) # converts to partial message
 	original_message = await associations.to_original(partial_message).fetch()
 
+	# for poll messages (deprecated kinda)
 	if original_message.author.id == client.user.id and reaction.message.content.startswith(poll_start):
 		await alter_poll(original_message , reaction , -1)
 		return
-		
-	return await update_reactions(original_message)
+	
+	# handle bridged duplicates
+	await update_reactions(original_message)
+	# handle original, user-sent message
+	if reaction.emoji in [react.emoji for react in original_message.reactions]:
+		await original_message.clear_reaction(reaction.emoji)
+
+	return
 
 @client.event
 async def on_message_edit(before , after):
