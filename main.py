@@ -661,17 +661,18 @@ async def alter_poll(original_message: discord.Message , reaction: discord.React
 async def update_reactions(message: discord.Message):
 	all_messages = await asyncio.gather(*[partial.fetch() for partial in associations.get_duplicates_of(message)]) + [message]
 	# re-count all reacts to a message across servers
-	all_reactions = {}
+	all_reactions = {} # dict of {emoji : count}
 	for message in all_messages:
 		for react in message.reactions:
-			if react.me: # is this really what you named this attribute, discord.py devs ?
-				print('test asdfghjkl')
-				continue # don't count your own reactions, mishnet !! 
-			if react.emoji in all_reactions.keys():
-				old_count = all_reactions[react.emoji]
-				all_reactions[react.emoji] = old_count + react.count
-			else:
-				all_reactions[react.emoji] = react.count 
+			async for user in react.users():
+				# mishnet shouldn't count reacts she added herself
+				if user.id == client.user.id:
+					continue
+				else:
+					if react.emoji in all_reactions.keys():
+						all_reactions[react.emoji] += 1
+					else:
+						all_reactions[react.emoji] = 1
 
 	# construct new view to replace old one
 	view = SuperCoolReactionView(all_reactions)
