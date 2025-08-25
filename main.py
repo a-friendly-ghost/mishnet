@@ -172,7 +172,6 @@ async def on_ready():
 	prolangs = client.get_channel(988876878582546472)
 	ostracod = client.get_channel(1093661502084493422)
 	openbook = client.get_channel(1139256333540012082)
-	hellcord = client.get_channel(1369370049990623374)
 
 	mishserver2 = client.get_channel(1006522289048784967)
 	agonyserver2 = client.get_channel(1006237275664949349)
@@ -182,11 +181,10 @@ async def on_ready():
 	prolangs2 = client.get_channel(1006660045511086080)
 	ostracod2 = client.get_channel(1093661477111611443)
 	openbook2 = client.get_channel(1139256312488808488)
-	hellcord2 = client.get_channel(1369370023855919165)
 
 	global mishnet1 , mishnet2 , mishnet_channels
-	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs , ostracod , openbook , hellcord] # conlanging
-	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , ostracod2 , openbook2 , hellcord2] # general
+	mishnet1 = [mishserver ,  agonyserver ,  cpserver ,  ccjserver ,  hallowspeak ,  prolangs , ostracod , openbook] # conlanging
+	mishnet2 = [mishserver2 , agonyserver2 , cpserver2 , ccjserver2 , hallowspeak2 , prolangs2 , ostracod2 , openbook2] # general
 	mishnet_channels = [mishnet1 , mishnet2]
 
 	print('all channels gotten')
@@ -202,7 +200,6 @@ async def on_ready():
 		prolangs : 'prolangs',
 		ostracod : 'ostracod conlangs',
 		openbook : 'open book',
-		hellcord : 'hellcord',
 
 		mishserver2 : 'mishserver',
 		agonyserver2 : 'agonyserver',
@@ -211,8 +208,7 @@ async def on_ready():
 		hallowspeak2 : 'Hallowspeak',
 		prolangs2 : 'prolangs',
 		ostracod2 : 'ostracod conlangs',
-		openbook2 : 'open book',
-		hellcord2 : 'hellcord'
+		openbook2 : 'open book'
 	}
 
 	# put all the webhooks in a dict for faster retrieval
