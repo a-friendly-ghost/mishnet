@@ -380,7 +380,7 @@ async def create_to_send(content: str, target_channel: discord.TextChannel, orig
 		to_send = '```' + repr(to_send.replace('```','')) + '```'
 
 	# removes tracking junk from youtube urls
-	to_send = re.sub(r"(https?://(?:youtube\.com/watch\?v=[^&]*|youtu\.be/[^?]*)).si=[a-zA-Z_=]*","\g<1>",to_send)
+	to_send = re.sub(r"(https?://(?:youtube\.com/watch\?v=[^&]*|youtu\.be/[^?]*)).si=[a-zA-Z0-9_-]*","\g<1>",to_send)
 
 	if len(to_send) > 1000 and replied_message:
 		to_send = prune_replies(to_send , 1000)
